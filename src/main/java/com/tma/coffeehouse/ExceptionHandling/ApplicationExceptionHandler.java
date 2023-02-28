@@ -38,7 +38,7 @@ public class ApplicationExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleUnwantedException(Exception e) {
         e.printStackTrace();
-        return ResponseEntity.status(500).body("Unknow error");
+        return ResponseEntity.status(500).body("Unknown error");
     }
 
 
