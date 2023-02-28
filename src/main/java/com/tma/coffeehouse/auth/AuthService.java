@@ -25,7 +25,7 @@ public class AuthService {
     public AuthenticateResponse register(RegisterRequest request){
         String requestUsername = request.getUserName();
         Optional<User> existUser = userRepository.findByUserName(requestUsername);
-        if (existUser.isPresent()) throw new CustomException("Username đã tồn tại", HttpStatus.FORBIDDEN);
+        if (existUser.isPresent()) throw new CustomException("Username đã tồn tại", HttpStatus.CONFLICT);
         User user = User.builder()
                 .name(request.getName())
                 .userName(request.getUserName())
@@ -43,24 +43,19 @@ public class AuthService {
     }
 
     public AuthenticateResponse authenticate(AuthenticateRequest request){
-        try {
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            request.getUserName(),
-                            request.getPassword()
-                    )
-            );
-            User user = userRepository.findByUserName(request.getUserName())
-                    .orElseThrow(AuthenticationException::new);
-            String token = jwtService.signToken(user);
-            return AuthenticateResponse.builder()
-                    .token(token)
-                    .build();
-        }catch(AuthenticationException err){
-            return AuthenticateResponse.builder()
-                    .token("")
-                    .build();
-        }
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.getUserName(),
+                        request.getPassword()
+                )
+        );
+        User user = userRepository.findByUserName(request.getUserName())
+                .orElseThrow(()->new CustomException("Tài khoản " + request.getUserName()+ " không tồn tại", HttpStatus.NOT_FOUND));
+        String token = jwtService.signToken(user);
+        return AuthenticateResponse.builder()
+                .token(token)
+                .build();
+
     }
 
     public User getIdentity(String token){

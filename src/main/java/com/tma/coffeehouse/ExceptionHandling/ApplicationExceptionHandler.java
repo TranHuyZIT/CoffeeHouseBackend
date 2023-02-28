@@ -35,6 +35,11 @@ public class ApplicationExceptionHandler {
         errorMap.put("message", err.getMessage());
         return errorMap;
     }
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<String> handleUnwantedException(Exception e) {
+        e.printStackTrace();
+        return ResponseEntity.status(500).body("Unknow error");
+    }
 
 
 }
