@@ -17,13 +17,14 @@ import java.sql.Timestamp;
 @NoArgsConstructor
 @Table(name = "cart")
 @Builder
+
 public class Cart {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column
     private String note = "";
-    @OneToOne
+    @OneToOne(optional = false)
     private Customer customer;
     @CreationTimestamp
     @Column(updatable = false)

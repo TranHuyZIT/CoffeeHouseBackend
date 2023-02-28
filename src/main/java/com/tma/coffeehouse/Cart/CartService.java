@@ -52,6 +52,7 @@ public class CartService {
     public GetFullCartDTO findOne(Long customerId) {
         Cart cart = cartRepository.findByCustomerId(customerId);
         GetFullCartDTO.GetFullCartDTOBuilder getFullCartDTO = GetFullCartDTO.builder();
+        getFullCartDTO.id(cart.getId());
         getFullCartDTO.note(cart.getNote());
         getFullCartDTO.createdAt(cart.getCreatedAt());
         getFullCartDTO.updatedAt(cart.getUpdatedAt());
