@@ -1,5 +1,7 @@
 package com.tma.coffeehouse.CartDetails;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.tma.coffeehouse.Cart.Cart;
 import com.tma.coffeehouse.Order.Order;
 import com.tma.coffeehouse.Product.Product;
 import com.tma.coffeehouse.Topping.Topping;
@@ -26,8 +28,9 @@ public class CartDetail {
     @JoinColumn(name = "product_id")
     private Product product;
     @ManyToOne
-    @JoinColumn(name = "order_id")
-    private Order order;
+    @JoinColumn(name = "cart_id")
+    @JsonIgnore
+    private Cart cart;
     @ManyToOne
     @JoinColumn(name = "unit_id")
     private Unit unit;
@@ -40,5 +43,8 @@ public class CartDetail {
     )
     private Set<Topping> toppings;
 
-
+    @Column
+    private String note = "";
+    @Column(nullable = false)
+    private Integer soluong;
 }
