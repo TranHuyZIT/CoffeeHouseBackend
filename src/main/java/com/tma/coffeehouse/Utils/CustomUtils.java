@@ -12,6 +12,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Objects;
 
 public class CustomUtils {
@@ -30,6 +33,15 @@ public class CustomUtils {
             return file.delete();
         }
         return false;
+    }
+    public static Date convertStringToDate(String dateString){
+        try{
+            SimpleDateFormat formatter = new SimpleDateFormat("dd-mm-yyyy");
+            Date date = formatter.parse(dateString);
+            return date;
+        }catch (ParseException e){
+            throw new CustomException("Không thể chuyển định dạng ngày tháng năm ", HttpStatus.BAD_REQUEST);
+        }
     }
     public static void uploadFileToDirectory(String uploadDir, MultipartFile multipartFile){
         Path uploadPath = Paths.get(uploadDir);
