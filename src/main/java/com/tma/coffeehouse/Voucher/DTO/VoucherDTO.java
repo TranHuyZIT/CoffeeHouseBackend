@@ -19,8 +19,8 @@ public class VoucherDTO {
     private Long id;
     private Float percentage;
     private Integer limitNumber;
-    private Date start;
-    private Date end;
+    private Date startDate;
+    private Date endDate;
     private Integer maxDiscount;
     private Integer minOrderTotal;
     Set<Product> products = new HashSet<>();

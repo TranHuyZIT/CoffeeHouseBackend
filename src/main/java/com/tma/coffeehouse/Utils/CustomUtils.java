@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -34,11 +35,11 @@ public class CustomUtils {
         }
         return false;
     }
-    public static Date convertStringToDate(String dateString){
+    public static Timestamp convertStringToDate(String dateString){
         try{
-            SimpleDateFormat formatter = new SimpleDateFormat("dd-mm-yyyy");
+            SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy");
             Date date = formatter.parse(dateString);
-            return date;
+            return new Timestamp(date.getTime());
         }catch (ParseException e){
             throw new CustomException("Không thể chuyển định dạng ngày tháng năm ", HttpStatus.BAD_REQUEST);
         }
