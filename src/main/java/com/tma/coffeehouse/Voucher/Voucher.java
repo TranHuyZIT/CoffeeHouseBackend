@@ -31,11 +31,11 @@ public class Voucher {
     @Column(nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
 
-    private Date start;
+    private Date startDate;
     @Column(nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
 
-    private Date end;
+    private Date endDate;
     @Column (nullable = false)
     private Integer maxDiscount;
     @Column (nullable = false)

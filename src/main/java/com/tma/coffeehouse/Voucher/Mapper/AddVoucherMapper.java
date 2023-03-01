@@ -19,9 +19,9 @@ public class AddVoucherMapper {
     public Voucher dtoTOModel(AddVoucherDTO addVoucherDTO){
         if (addVoucherDTO == null) return null;
         Voucher.VoucherBuilder voucherBuilder = Voucher.builder();
-        voucherBuilder.start(addVoucherDTO.getStart());
-        voucherBuilder.end(addVoucherDTO.getEnd());
-        voucherBuilder.limitNumber(addVoucherDTO.getLimitPrice());
+        voucherBuilder.startDate(addVoucherDTO.getStartDate());
+        voucherBuilder.endDate(addVoucherDTO.getEndDate());
+        voucherBuilder.limitNumber(addVoucherDTO.getLimitNumber());
         voucherBuilder.maxDiscount(addVoucherDTO.getMaxDiscount());
         voucherBuilder.minOrderTotal(addVoucherDTO.getMinOrderTotal());
         voucherBuilder.percentage(addVoucherDTO.getPercentage());

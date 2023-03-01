@@ -18,8 +18,8 @@ import java.util.Set;
 public class AddVoucherDTO {
     private Float percentage;
     private Integer limitNumber;
-    private Date end;
-    private Date start;
+    private Date endDate;
+    private Date startDate;
     private Integer maxDiscount;
     private Integer minOrderTotal;
     Long[] productsId ;
