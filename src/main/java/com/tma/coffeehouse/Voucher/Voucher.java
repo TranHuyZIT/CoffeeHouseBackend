@@ -27,7 +27,7 @@ public class Voucher {
     @Column(nullable = false)
     private Float percentage;
     @Column (nullable = false)
-    private Integer limitPrice;
+    private Integer limitNumber;
     @Column(nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
 

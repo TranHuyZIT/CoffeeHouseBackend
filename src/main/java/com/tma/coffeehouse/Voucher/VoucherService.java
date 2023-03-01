@@ -43,7 +43,7 @@ public class VoucherService {
         Voucher current = voucherRepository.findById(id)
                 .orElseThrow(()-> new CustomException("Không tìm thấy voucher có id là " + id, HttpStatus.NOT_FOUND));
         current.setEnd(newVoucher.getEnd());
-        current.setLimitPrice(newVoucher.getLimitPrice());
+        current.setLimitNumber(newVoucher.getLimitNumber());
         current.setStart(newVoucher.getStart());
         current.setPercentage(newVoucher.getPercentage());
         current.setMaxDiscount(newVoucher.getMaxDiscount());
