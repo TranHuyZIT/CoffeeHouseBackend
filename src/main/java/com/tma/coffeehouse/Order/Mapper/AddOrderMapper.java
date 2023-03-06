@@ -1,13 +1,10 @@
 package com.tma.coffeehouse.Order.Mapper;
 
-import com.tma.coffeehouse.Customers.Customer;
 import com.tma.coffeehouse.Customers.CustomerRepository;
-import com.tma.coffeehouse.Customers.CustomerService;
 import com.tma.coffeehouse.ExceptionHandling.CustomException;
 import com.tma.coffeehouse.Order.DTO.AddOrderDTO;
 import com.tma.coffeehouse.Order.Order;
 import com.tma.coffeehouse.Voucher.VoucherRepository;
-import com.tma.coffeehouse.Voucher.VoucherService;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
