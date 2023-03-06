@@ -44,6 +44,16 @@ public class CustomUtils {
             throw new CustomException("Không thể chuyển định dạng ngày tháng năm ", HttpStatus.BAD_REQUEST);
         }
     }
+    public static Date getDateWithoutTime() {
+        try{
+            SimpleDateFormat formatter = new SimpleDateFormat(
+                    "dd/MM/yyyy");
+            return formatter.parse(formatter.format(new Date()));
+        }
+        catch (ParseException e){
+            throw new CustomException("Không thể lấy thời gian hiện tại", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
     public static void uploadFileToDirectory(String uploadDir, MultipartFile multipartFile){
         Path uploadPath = Paths.get(uploadDir);
         String fileName = StringUtils.cleanPath(Objects.requireNonNull(multipartFile.getOriginalFilename()));
