@@ -17,7 +17,7 @@ public class ApplicationExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Map<String, String> handleAuthenticationException(AuthenticationException err){
         Map<String, String> errorMap = new HashMap<>();
-        errorMap.put("message", err.getMessage());
+        errorMap.put("message", "Thông tin đăng nhập không hợp lệ, vui lòng kiểm tra lại tài khoản và mật khẩu");
         return errorMap;
     }
 
@@ -29,16 +29,19 @@ public class ApplicationExceptionHandler {
     }
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Map<String, String> handleHttpMediaTypeNotSupportedException(HttpMediaTypeNotSupportedException err){
         Map<String, String> errorMap = new HashMap<>();
         errorMap.put("message", err.getMessage());
         return errorMap;
     }
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<String> handleUnwantedException(Exception e) {
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Map<String, String> handleUnwantedException(Exception e) {
         e.printStackTrace();
-        return ResponseEntity.status(500).body("Unknown error");
+        Map<String, String> errorMap = new HashMap<>();
+        errorMap.put("mesage","Có lỗi xảy ra, vui lòng thử lại sau");
+        return  errorMap;
     }
 
 

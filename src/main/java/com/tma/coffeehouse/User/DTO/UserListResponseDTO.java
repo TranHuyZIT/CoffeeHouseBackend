@@ -1,20 +1,17 @@
-package com.tma.coffeehouse.auth;
+package com.tma.coffeehouse.User.DTO;
 
 import com.tma.coffeehouse.User.Gender;
 import com.tma.coffeehouse.User.Role;
+import jakarta.persistence.Column;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
+@Data
+@Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-@Data
-public class AuthenticateResponse {
-    private String token;
+public class UserListResponseDTO {
     private Long id;
     private String name;
     private String userName;

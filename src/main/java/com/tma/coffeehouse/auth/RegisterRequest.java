@@ -1,5 +1,6 @@
 package com.tma.coffeehouse.auth;
 
+import com.tma.coffeehouse.User.Gender;
 import com.tma.coffeehouse.User.Role;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -16,6 +17,6 @@ public class RegisterRequest {
     private String password;
     private String email;
     private Role role;
-    private Boolean gender;
+    private Gender gender;
     private  String phone;
 }

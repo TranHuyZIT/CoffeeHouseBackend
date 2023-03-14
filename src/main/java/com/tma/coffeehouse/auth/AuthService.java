@@ -1,8 +1,8 @@
 package com.tma.coffeehouse.auth;
 
 import com.tma.coffeehouse.ExceptionHandling.CustomException;
-import com.tma.coffeehouse.User.User;
-import com.tma.coffeehouse.User.UserRepository;
+import com.tma.coffeehouse.User.*;
+import com.tma.coffeehouse.User.DTO.UserResponseDTO;
 import com.tma.coffeehouse.config.JWTService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -11,7 +11,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import javax.naming.AuthenticationException;
 import java.util.Optional;
 
 @Service
@@ -20,6 +19,7 @@ public class AuthService {
     private final UserRepository userRepository;
     private final JWTService jwtService;
     private final PasswordEncoder passwordEncoder;
+    private final UserMapper userMapper;
 
     private final AuthenticationManager authenticationManager;
     public AuthenticateResponse register(RegisterRequest request){
@@ -27,18 +27,25 @@ public class AuthService {
         Optional<User> existUser = userRepository.findByUserName(requestUsername);
         if (existUser.isPresent()) throw new CustomException("Username đã tồn tại", HttpStatus.CONFLICT);
         User user = User.builder()
-                .name(request.getName())
+                .name("")
                 .userName(request.getUserName())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .email(request.getEmail())
-                .role(request.getRole())
+                .role(Role.USER)
                 .phone((request.getPhone()))
                 .gender(request.getGender())
                 .build();
-        userRepository.save(user);
+        User newUser = userRepository.save(user);
         String token = jwtService.signToken(user);
         return AuthenticateResponse.builder()
                 .token(token)
+                .id(newUser.getId())
+                .email(newUser.getEmail())
+                .gender(newUser.getGender())
+                .phone(newUser.getPhone())
+                .name(newUser.getName())
+                .role(newUser.getRole())
+                .userName(newUser.getUsername())
                 .build();
     }
 
@@ -54,14 +61,23 @@ public class AuthService {
         String token = jwtService.signToken(user);
         return AuthenticateResponse.builder()
                 .token(token)
+                .id(user.getId())
+                .email(user.getEmail())
+                .gender(user.getGender())
+                .phone(user.getPhone())
+                .name(user.getName())
+                .role(user.getRole())
+                .userName(user.getUsername())
                 .build();
-
     }
 
-    public User getIdentity(String token){
+    public UserResponseDTO getIdentity(String token){
         String userName = jwtService.extractUserName(token);
         User user = userRepository.findByUserName(userName).
                 orElseThrow(() -> new CustomException("Không tìm thấy tài khoản với username là " + userName , HttpStatus.NOT_FOUND));
-        return user;
+        System.out.println(user);
+        UserResponseDTO userResponseDTO = userMapper.modelTODTO(user);
+        userResponseDTO.setToken(token);
+        return userResponseDTO;
     }
 }
