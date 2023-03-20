@@ -40,7 +40,7 @@ public class ApplicationExceptionHandler {
     public Map<String, String> handleUnwantedException(Exception e) {
         e.printStackTrace();
         Map<String, String> errorMap = new HashMap<>();
-        errorMap.put("mesage","Có lỗi xảy ra, vui lòng thử lại sau");
+        errorMap.put("message","Có lỗi xảy ra, vui lòng thử lại sau");
         return  errorMap;
     }
 

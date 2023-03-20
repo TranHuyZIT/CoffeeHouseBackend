@@ -9,6 +9,9 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -56,6 +59,16 @@ public class ProductCategoryService {
         File file = new File(imageDir);
         CustomUtils.deleteDirectory(file);
         return currentCategory;
+    }
+    public byte[] getProductCategoryImage(Long id) {
+        ProductCategory currentCategory = productCategoryRepository.findById(id)
+                .orElseThrow(() -> new CustomException("Không tìm thấy danh mục sản phẩm với mã " + id, HttpStatus.NOT_FOUND));
+        try{
+            return Files.readAllBytes(Paths.get("./src/main/resources/static/prod-category-img/" + id +"/" + currentCategory.getImage() ));
+        }
+        catch (IOException exception){
+            throw new CustomException("Không tìm thấy hình ảnh cho danh mục có id " + id, HttpStatus.NOT_FOUND);
+        }
     }
 
 }

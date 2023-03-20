@@ -36,18 +36,19 @@ public class SecurityConfiguration {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecure) throws Exception {
-
         // Disable csrf
         httpSecure
                 .cors()
                 .and()
                 .csrf()
                 .disable()
+//                .authorizeHttpRequests()
+//                .requestMatchers("/api/v1/auth/*") // add Whitelist (endpoint without using jwt)
                 .authorizeHttpRequests()
-                .requestMatchers("/api/v1/auth/*")// add Whitelist (endpoint without using jwt)
-                .permitAll()
                 .anyRequest()
-                .authenticated()
+                .permitAll()
+//                .anyRequest()
+//                .authenticated()
                 .and()
                 .exceptionHandling()
                 .authenticationEntryPoint(authenticationEntryPoint)

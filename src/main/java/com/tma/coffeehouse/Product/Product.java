@@ -33,7 +33,7 @@ public class Product {
             joinColumns = @JoinColumn(name = "productID"),
             inverseJoinColumns = @JoinColumn(name = "toppingID")
     )
-    @JsonIgnore
+
     private Set<Topping> productToppings = new HashSet<>();
     @Column(nullable = false)
     private String name;
@@ -45,7 +45,7 @@ public class Product {
     private Integer price;
     @Column(nullable = false)
     private String image;
-    @Column(nullable = false)
+    @Column(nullable = false, length = 10000)
     private String description;
 
     @CreationTimestamp
@@ -57,4 +57,5 @@ public class Product {
     public void addTopping(Topping topping){
         this.productToppings.add(topping);
     }
+    public void removeTopping(Topping topping){this.productToppings.remove(topping);}
 }
