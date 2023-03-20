@@ -37,11 +37,7 @@ public class VoucherServiceImpl implements VoucherService {
     public Page<VoucherDTO> findAll(Integer pageNo, Integer pageSize, String sortBy) {
         Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).ascending());
         Page<Voucher> page = voucherRepository.findAll(pageable);
-        List<VoucherDTO> voucherDTO = voucherMapper.modelsTODTOS(
-                page.getContent()
-        );
-        Page<VoucherDTO> pageDTO = page.map(voucherMapper::modelTODto);
-        return pageDTO;
+        return page.map(voucherMapper::modelTODto);
     }
     public VoucherDTO findById(Long id){
         return voucherMapper.modelTODto(
@@ -79,12 +75,6 @@ public class VoucherServiceImpl implements VoucherService {
         for(Voucher voucher: allVouchers) {
             if (cartTotal < voucher.getMinOrderTotal()) continue;
             boolean isValid = true;
-//            for (DetailOfCartDTO cartDetail: cart.getDetails()){
-//                if (!voucher.getProducts().contains(cartDetail.getProduct())){
-//                    isValid = false;
-//                    break;
-//                }
-//            }
             for(Product product: voucher.getProducts()){
                 if (!productsOfCart.contains(product)){
                     isValid = false;

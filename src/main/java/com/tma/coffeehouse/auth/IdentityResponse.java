@@ -1,4 +1,5 @@
 package com.tma.coffeehouse.auth;
+import com.tma.coffeehouse.User.Gender;
 import com.tma.coffeehouse.User.Role;
 import lombok.*;
 
@@ -13,5 +14,5 @@ public class IdentityResponse {
     private String name;
     private Role role;
     private String phone;
-    private Boolean gender;
+    private Gender gender;
 }

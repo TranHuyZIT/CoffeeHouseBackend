@@ -9,8 +9,11 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.awt.*;
 import java.io.IOException;
 import java.util.List;
+
+import static org.springframework.http.MediaType.IMAGE_PNG_VALUE;
 
 
 @RestController
@@ -21,6 +24,10 @@ public class ProductCategoryController {
     @GetMapping
     public ResponseEntity<List<ProductCategory>> getAllProductCategory(){
         return new ResponseEntity<>(productCategoryService.findAll(), HttpStatus.OK);
+    }
+    @GetMapping(value = "/image/{id}", produces = IMAGE_PNG_VALUE )
+    public byte[] getProductCategoryImage(@PathVariable Long id){
+        return productCategoryService.getProductCategoryImage(id);
     }
     @PostMapping
     public ResponseEntity<ProductCategory> insertProductCategory(@RequestParam("image") MultipartFile multipartFile,@RequestParam("name") String name) throws IOException {

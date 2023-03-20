@@ -28,7 +28,7 @@ public class VoucherController {
     }
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public VoucherDTO update(Long id, AddVoucherDTO addVoucherDTO){
+    public VoucherDTO update(@PathVariable  Long id, AddVoucherDTO addVoucherDTO){
         return voucherServiceImpl.update(id, addVoucherDTO);
     }
 

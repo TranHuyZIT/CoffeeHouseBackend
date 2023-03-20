@@ -11,7 +11,7 @@ import java.util.List;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
-    @Query(value="SELECT p FROM Product AS p JOIN ProductCategory AS pc ON p.productCategory = pc WHERE (:prodCategoryID = 0 or pc.id = :prodCategoryID) AND (:name = '' or LOWER(p.name) like CONCAT('%',:name,'%'))")
+    @Query(value="SELECT p FROM Product AS p JOIN ProductCategory AS pc ON p.productCategory = pc  WHERE (:prodCategoryID = 0 or pc.id = :prodCategoryID) AND (:name = '' or LOWER(p.name) like CONCAT('%',:name,'%'))")
     Page<Product> findAllByQueries(@Param("prodCategoryID") Long prodCategoryID, @Param("name") String name, Pageable pageable);
 
 }

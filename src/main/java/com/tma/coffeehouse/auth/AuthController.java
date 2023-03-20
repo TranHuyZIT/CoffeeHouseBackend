@@ -1,10 +1,8 @@
 package com.tma.coffeehouse.auth;
 
 
-import com.tma.coffeehouse.User.User;
-import lombok.AllArgsConstructor;
+import com.tma.coffeehouse.User.DTO.UserResponseDTO;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,16 +20,16 @@ public class AuthController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @RequestMapping(method = RequestMethod.POST, path="/authenticate")
+    @RequestMapping(method = RequestMethod.POST, path="/login")
     public ResponseEntity<AuthenticateResponse> authenticate(@RequestBody AuthenticateRequest request){
         AuthenticateResponse response = authService.authenticate(request);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @GetMapping("/identity")
-    public User getIdentity(@RequestHeader(HttpHeaders.AUTHORIZATION) String token){
+    public UserResponseDTO getIdentity(@RequestHeader(HttpHeaders.AUTHORIZATION) String token){
         token = token.replace("Bearer", "");
-        User response = authService.getIdentity(token);
+        UserResponseDTO response = authService.getIdentity(token);
         return response;
     }
 }
