@@ -32,6 +32,11 @@ public class FullOrderMapper {
         fullOrderDTO.voucher( order.getVoucher() );
         fullOrderDTO.customer( order.getCustomer() );
         fullOrderDTO.status( order.getStatus() );
+        fullOrderDTO.tongsl(order.getTongsl());
+        fullOrderDTO.tongtien(order.getTongtien());
+        fullOrderDTO.createdAt(order.getCreatedAt());
+        fullOrderDTO.updatedAt(order.getUpdatedAt());
+
 
         Set<OrderDetailDTO> details = new HashSet<>(orderDetailService.findAll(order.getId()));
         Set<DetailOfOrder> detailOfOrders = new HashSet<>();

@@ -7,8 +7,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 
+import java.sql.Timestamp;
 import java.util.Date;
 
 @Entity
@@ -21,18 +24,29 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(nullable = false)
+    @Column
     private String address;
-    @Column(nullable = false)
+    @Column
     @Temporal(TemporalType.TIMESTAMP)
     private Date deliveryTime;
-    @Column(nullable = false)
+    @Column
     private String note;
     @OneToOne(optional = true)
     private Voucher voucher;
     @Column
+    @Enumerated(EnumType.STRING)
     private OrderStatus status = OrderStatus.RECEIVED;
+
+    @Column
+    private Long tongtien = 0L;
+    @Column
+    private Integer tongsl = 0;
     @ManyToOne
     @JoinColumn(name = "customer_id")
     private Customer customer;
+    @CreationTimestamp
+    @Column(updatable = false)
+    Timestamp createdAt;
+    @UpdateTimestamp
+    Timestamp updatedAt;
 }

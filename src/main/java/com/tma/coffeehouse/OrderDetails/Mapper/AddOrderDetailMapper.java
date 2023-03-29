@@ -48,6 +48,7 @@ public class AddOrderDetailMapper {
         orderDetail.product(product);
         orderDetail.unit(unit);
         orderDetail.toppings(topppings);
+        orderDetail.soluong(addOrderDetailDTO.getSoluong() != null ? addOrderDetailDTO.getSoluong() : Integer.valueOf(1));
         return orderDetail.build();
     }
 }

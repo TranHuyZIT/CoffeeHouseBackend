@@ -31,12 +31,17 @@ public class ToppingService {
     }
     Page<Topping> findAll (Long productID, String name, Integer pageNo, Integer pageSize, String sortBy, Boolean reverse){
         // Pagination nad Queries
-        if (pageNo == -1) return toppingRepository.findAll(
-                PageRequest.of(0, Integer.MAX_VALUE,
-                        Sort.by(reverse? Sort.Direction.DESC : Sort.Direction. ASC, sortBy))
-        );
-        Pageable pageRequest = PageRequest.of(pageNo, pageSize,
-                Sort.by(reverse? Sort.Direction.DESC : Sort.Direction. ASC, sortBy));
+        System.out.println(pageNo);
+
+        Pageable pageRequest ;
+        if (pageNo == -1) {
+            pageRequest = PageRequest.of(0, Integer.MAX_VALUE,
+                    Sort.by(reverse? Sort.Direction.DESC : Sort.Direction. ASC, sortBy));
+        }
+        else{
+            pageRequest = PageRequest.of(pageNo, pageSize,
+                    Sort.by(reverse? Sort.Direction.DESC : Sort.Direction. ASC, sortBy));
+        }
         if (productID == 0 && Objects.equals(name, "")){
             return toppingRepository.findAll(pageRequest);
         }else if (Objects.equals(name, "")){

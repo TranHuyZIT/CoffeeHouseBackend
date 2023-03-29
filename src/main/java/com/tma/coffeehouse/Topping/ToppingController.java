@@ -23,13 +23,13 @@ public class ToppingController {
     }
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public Page<Topping> findAll(@RequestParam(required = false, defaultValue = "0") Long productID ,
+    public Page<Topping> findAll(@RequestParam(required = false, defaultValue = "0", name = "productId") Long productId ,
                                  @RequestParam(name="name", defaultValue = "") String name,
                                  @RequestParam(defaultValue = "0", name="pageNo", required = false) Integer pageNo,
                                  @RequestParam(defaultValue = "1000", name="pageSize", required= false ) Integer pageSize,
                                  @RequestParam(defaultValue = "createdAt", name="sortBy") String sortBy,
                                  @RequestParam(defaultValue = "true", name="reverse") boolean reverse ){
-        return toppingService.findAll(productID, name, pageNo - 1, pageSize, sortBy, reverse);
+        return toppingService.findAll(productId, name, pageNo - 1, pageSize, sortBy, reverse);
     }
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)

@@ -20,6 +20,7 @@ public class OrderDetailDTO {
     private Product product;
 
     private Order order;
+    private Integer soluong;
 
     private Unit unit;
     private Set<Topping> toppings;
