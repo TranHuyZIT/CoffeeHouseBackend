@@ -18,6 +18,7 @@ import java.util.Set;
 public class AddOrderDetailDTO {
     private Long productId;
     private Long unitId;
+    private Integer soluong = 1;
     private Long[] toppingIds;
     private Long orderId;
 }

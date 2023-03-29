@@ -16,9 +16,9 @@ public class VoucherController {
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public Page<VoucherDTO> findAll(
-            @RequestParam(defaultValue = "0", name="pageNo") Integer pageNo,
-            @RequestParam(defaultValue = "10", name="pageSize") Integer pageSize,
-            @RequestParam(defaultValue = "createdAt", name="sortBy") String sortBy){
+            @RequestParam(defaultValue = "0", name="pageNo", required = false) Integer pageNo,
+            @RequestParam(defaultValue = "10", name="pageSize", required = false) Integer pageSize,
+            @RequestParam(defaultValue = "createdAt", name="sortBy", required = false) String sortBy){
         return voucherServiceImpl.findAll(pageNo, pageSize, sortBy);
     }
     @PostMapping

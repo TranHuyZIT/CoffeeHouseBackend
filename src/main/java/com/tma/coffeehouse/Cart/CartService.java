@@ -10,6 +10,8 @@ import com.tma.coffeehouse.CartDetails.DTO.AddCartDetailDTO;
 import com.tma.coffeehouse.CartDetails.DTO.DetailOfCartDTO;
 import com.tma.coffeehouse.CartDetails.Mapper.AddCartDetailMapper;
 import com.tma.coffeehouse.CartDetails.Mapper.DetailOfCartMapper;
+import com.tma.coffeehouse.Customers.Customer;
+import com.tma.coffeehouse.Customers.CustomerService;
 import com.tma.coffeehouse.ExceptionHandling.CustomException;
 import com.tma.coffeehouse.Topping.Topping;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +30,7 @@ public class CartService {
     private final CartMapper cartMapper;
     private final AddCartDetailMapper addCartDetailMapper;
     private final DetailOfCartMapper detailOfCartMapper;
+    private final CustomerService customerService;
     public CartDTO insert(Cart cart){
         return cartMapper.modelTODto(
                 cartRepository.save(cart)
@@ -75,14 +78,15 @@ public class CartService {
         CartDetail cartDetail = addCartDetailMapper.dtoTOModel(addCartDetailDTO);
         return cartDetailRepository.save(cartDetail);
     }
-    public CartDetail deleteCartDetail(Long id){
-        CartDetail cartDetail = cartDetailRepository.findById(id)
-                .orElseThrow(()->new CustomException("Không tìm thấy chi tiết giỏ hàng với mã" + id, HttpStatus.NOT_FOUND));
-        cartDetailRepository.delete(cartDetail);
-        return cartDetail;
-    }
     public GetFullCartDTO findOne(Long customerId) {
-        Cart cart = cartRepository.findByCustomerId(customerId);
+        Customer currentCustomer = customerService.findOne(customerId);
+        Cart cart = cartRepository.findByCustomerId(currentCustomer.getId());
+        if (cart == null){
+            Customer customer = customerService.findOne(customerId);
+            System.out.println(customer);
+            Cart newCart = Cart.builder().customer(customer).build();
+            cart = cartMapper.dtoTOModel(this.insert(newCart));
+        }
         GetFullCartDTO.GetFullCartDTOBuilder getFullCartDTO = GetFullCartDTO.builder();
         getFullCartDTO.id(cart.getId());
         getFullCartDTO.note(cart.getNote());
@@ -93,5 +97,8 @@ public class CartService {
         Set<DetailOfCartDTO> detailOfCartDTOS = detailOfCartMapper.modelsTODTOS(details);
         getFullCartDTO.details(detailOfCartDTOS);
         return getFullCartDTO.build();
+    }
+    public CartDetail  deleteCartDetail(Long id){
+        return cartDetailService.delete(id);
     }
 }

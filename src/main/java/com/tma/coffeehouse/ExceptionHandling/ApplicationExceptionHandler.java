@@ -1,5 +1,8 @@
 package com.tma.coffeehouse.ExceptionHandling;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
@@ -25,6 +28,7 @@ public class ApplicationExceptionHandler {
     public ResponseEntity<Map<String, String>> handleCustomException(CustomException err){
         Map<String, String> errorMap = new HashMap<>();
         errorMap.put("message", err.getMessage());
+        System.out.println(err);
         return new ResponseEntity<>(errorMap, err.getStatusCode());
     }
 

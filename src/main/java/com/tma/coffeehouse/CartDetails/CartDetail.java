@@ -46,5 +46,5 @@ public class CartDetail {
     @Column
     private String note = "";
     @Column(nullable = false)
-    private Integer soluong;
+    private Integer soluong = 1;
 }

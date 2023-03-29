@@ -44,6 +44,10 @@ public class ProductService {
     private ToppingService toppingService;
     private final ProductCategoryService productCategoryService;
     Page<Product> findAll(Long productCategoryID, String name, Integer pageNo, Integer pageSize, String sortBy, Boolean reverse){
+        if (pageNo == -1) {
+            Pageable pageAndSortingRequest = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(reverse? Sort.Direction.DESC : Sort.Direction. ASC, sortBy));
+            return productRepository.findAllByQueries(productCategoryID, name, pageAndSortingRequest);
+        }
         Pageable pageAndSortingRequest = PageRequest.of(pageNo, pageSize, Sort.by(reverse? Sort.Direction.DESC : Sort.Direction. ASC, sortBy));
         return  productRepository.findAllByQueries(productCategoryID, name, pageAndSortingRequest);
     }

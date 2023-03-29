@@ -10,7 +10,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.sql.Timestamp;
 import java.util.Date;
 import java.util.Set;
 
@@ -27,4 +29,8 @@ public class FullOrderDTO {
     private Customer customer;
     private OrderStatus status = OrderStatus.RECEIVED;
     private Set<DetailOfOrder> details;
+    private Long tongtien = 0L;
+    private Integer tongsl = 0;
+    Timestamp createdAt;
+    Timestamp updatedAt;
 }

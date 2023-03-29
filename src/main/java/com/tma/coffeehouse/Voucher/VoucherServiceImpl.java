@@ -35,8 +35,12 @@ public class VoucherServiceImpl implements VoucherService {
     private final CartService cartService;
     private final AddVoucherMapper addVoucherMapper;
     public Page<VoucherDTO> findAll(Integer pageNo, Integer pageSize, String sortBy) {
+        System.out.println(pageNo);
+        System.out.println(pageSize);
+        System.out.println(sortBy);
         Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(sortBy).ascending());
         Page<Voucher> page = voucherRepository.findAll(pageable);
+        System.out.print(page);
         return page.map(voucherMapper::modelTODto);
     }
     public VoucherDTO findById(Long id){

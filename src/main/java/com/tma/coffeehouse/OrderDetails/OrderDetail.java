@@ -33,6 +33,8 @@ public class OrderDetail {
     @JoinColumn(name = "unit_id")
     private Unit unit;
 
+    @Column
+    private Integer soluong = 1;
     @ManyToMany
     @JoinTable(
             name = "orderDetail_topping",

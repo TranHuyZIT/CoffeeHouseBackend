@@ -22,9 +22,9 @@ public class Customer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column
     private String address;
-    @Column (nullable = false)
+    @Column
     private String image;
 
     @OneToOne(optional = false)

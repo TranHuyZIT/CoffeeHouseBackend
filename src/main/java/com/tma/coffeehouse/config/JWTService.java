@@ -1,10 +1,10 @@
 package com.tma.coffeehouse.config;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import com.tma.coffeehouse.ExceptionHandling.CustomException;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -42,7 +42,7 @@ public class JWTService {
                 .setClaims(extraClaims)
                 .setSubject(userDetails.getUsername())
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000000 * 60 * 24)).signWith(getSecretKey(), SignatureAlgorithm.HS256)
+                .setExpiration(new Date(System.currentTimeMillis() + 86400000)).signWith(getSecretKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
     public <T> T extractClaim(String token, Function <Claims, T> claimsResolver){
@@ -50,7 +50,15 @@ public class JWTService {
         return claimsResolver.apply(claims);
     }
     private Claims extractAllClaims(String token){
-        return Jwts.parserBuilder().setSigningKey(getSecretKey()).build().parseClaimsJws(token).getBody();
+        try{
+            return Jwts.parserBuilder().setSigningKey(getSecretKey()).build().parseClaimsJws(token).getBody();
+        }
+        catch (ExpiredJwtException e){
+            throw new CustomException("JWT expired", HttpStatus.UNAUTHORIZED);
+        }
+    }
+    public void throwExpiredError(String authHeader,String token){
+        throw new ExpiredJwtException(null, this.extractAllClaims(token), "");
     }
     private Key getSecretKey(){
         byte[] KeyBytes = Decoders.BASE64.decode(SECRET_KEY);

@@ -46,4 +46,10 @@ public class OrderDetailService {
                 orderDetailRepository.save(current)
         );
     }
+    public OrderDetailDTO delete(Long id){
+        OrderDetail current = orderDetailRepository.findById(id).orElseThrow(()->new CustomException("Không tìm thấy chi tiếtdđơn hàng với mã "+ id,
+                HttpStatus.NOT_FOUND));
+        orderDetailRepository.delete(current);
+        return orderDetailMapper.modelTODTO(current);
+    }
 }

@@ -24,4 +24,8 @@ public class CartController {
     public CartDetail insertCartDetail(@RequestBody AddCartDetailDTO detail){
         return cartService.insertCartDetail(detail);
     }
+    @DeleteMapping("/detail/{id}")
+    public CartDetail deleteCartDetail(@PathVariable Long id){
+        return cartService.deleteCartDetail(id);
+    }
 }

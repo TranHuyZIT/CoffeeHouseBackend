@@ -19,4 +19,5 @@ public class DetailOfCartDTO {
     private Product product;
     private Unit unit;
     private Set<Topping> toppings;
+    private Integer soluong = 1;
 }
