@@ -29,24 +29,26 @@ public class Voucher {
     @Column (nullable = false)
     private Integer limitNumber;
     @Column(nullable = false)
+    private Integer remainingNumber;
+    @Column(nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
-
     private Date startDate;
+    @Column(nullable = false)
+    private String name;
     @Column(nullable = false)
     @Temporal(TemporalType.TIMESTAMP)
 
     private Date endDate;
     @Column (nullable = false)
-    private Integer maxDiscount;
+    private Long maxDiscount;
     @Column (nullable = false)
-    private Integer minOrderTotal;
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Long minOrderTotal;
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             joinColumns = @JoinColumn(name = "voucherId"),
             inverseJoinColumns = @JoinColumn(name = "productId")
     )
     Set<Product> products = new HashSet<>();
-
     @CreationTimestamp
     @Column(updatable = false)
     Timestamp createdAt;

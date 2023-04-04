@@ -19,5 +19,7 @@ public class DetailOfCartDTO {
     private Product product;
     private Unit unit;
     private Set<Topping> toppings;
+    private Long tongtien = 0L;
     private Integer soluong = 1;
+    private String note = "";
 }

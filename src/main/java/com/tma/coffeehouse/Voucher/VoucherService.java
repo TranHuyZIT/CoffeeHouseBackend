@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import java.util.Set;
 
 public interface VoucherService {
-    Page<VoucherDTO> findAll(Integer pageNo, Integer pageSize, String sortBy);
+    Page<Voucher> findAll(Integer pageNo, Integer pageSize, String sortBy, Boolean reverse);
     VoucherDTO findById(Long id);
      VoucherDTO insert(AddVoucherDTO addVoucherDTO);
      VoucherDTO update(long id, AddVoucherDTO addVoucherDTO);

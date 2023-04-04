@@ -15,6 +15,6 @@ import java.util.Set;
 public interface VoucherRepository extends JpaRepository<Voucher, Long> {
     Page<Voucher> findAll(Pageable pageable);
 
-    @Query("SELECT v FROM Voucher v WHERE (?1 BETWEEN v.startDate AND v.endDate) AND (v.limitNumber > 0)")
+    @Query("SELECT v FROM Voucher v WHERE (?1 BETWEEN DATE(v.startDate) AND DATE(v.endDate)) AND (v.limitNumber > 0)")
     Set<Voucher> findAllAvailable(Date currentDate);
 }

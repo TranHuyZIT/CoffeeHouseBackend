@@ -1,8 +1,10 @@
 package com.tma.coffeehouse.Cart;
 
+import com.tma.coffeehouse.Cart.DTO.CheckOutInfoDTO;
 import com.tma.coffeehouse.Cart.DTO.GetFullCartDTO;
 import com.tma.coffeehouse.CartDetails.CartDetail;
 import com.tma.coffeehouse.CartDetails.DTO.AddCartDetailDTO;
+import com.tma.coffeehouse.Order.Order;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +25,11 @@ public class CartController {
     @ResponseStatus(HttpStatus.CREATED)
     public CartDetail insertCartDetail(@RequestBody AddCartDetailDTO detail){
         return cartService.insertCartDetail(detail);
+    }
+    @PostMapping("/checkout/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public Order checkOutCart(@PathVariable Long id, @RequestBody CheckOutInfoDTO checkOutInfoDTO){
+        return cartService.checkOutCart(id, checkOutInfoDTO);
     }
     @DeleteMapping("/detail/{id}")
     public CartDetail deleteCartDetail(@PathVariable Long id){

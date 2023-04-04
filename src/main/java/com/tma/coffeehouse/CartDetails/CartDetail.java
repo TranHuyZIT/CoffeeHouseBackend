@@ -47,4 +47,6 @@ public class CartDetail {
     private String note = "";
     @Column(nullable = false)
     private Integer soluong = 1;
+    @Column
+    private Long tongtien = 0L;
 }
