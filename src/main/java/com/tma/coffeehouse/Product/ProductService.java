@@ -1,5 +1,7 @@
 package com.tma.coffeehouse.Product;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tma.coffeehouse.Product.DTO.AddProductRequest;
 import com.tma.coffeehouse.Product.DTO.ProductDTO;
@@ -7,12 +9,14 @@ import com.tma.coffeehouse.Product.DTOMapper.AddProductMapper;
 import com.tma.coffeehouse.Product.DTOMapper.ProductMapper;
 import com.tma.coffeehouse.ProductCategory.ProductCategoryService;
 import com.tma.coffeehouse.Topping.Topping;
-import com.tma.coffeehouse.Topping.ToppingRepository;
 import com.tma.coffeehouse.Topping.ToppingService;
 import com.tma.coffeehouse.Utils.CustomUtils;
 import com.tma.coffeehouse.ExceptionHandling.CustomException;
 import com.tma.coffeehouse.ProductCategory.ProductCategory;
-import com.tma.coffeehouse.ProductCategory.ProductCategoryRepository;
+import com.tma.coffeehouse.config.Cache.CacheData;
+import com.tma.coffeehouse.config.Cache.CacheRepository;
+import com.tma.coffeehouse.config.Cache.CacheService;
+import com.tma.coffeehouse.config.Serializer.PageModule;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,17 +43,44 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final AddProductMapper addProductMapper;
     private final ProductMapper productMapper;
+    private final CacheRepository cacheDataRepository;
+    private final CacheService cacheService;
+
+    private final ObjectMapper objectMapper;
     @Lazy
     @Autowired
     private ToppingService toppingService;
     private final ProductCategoryService productCategoryService;
-    Page<Product> findAll(Long productCategoryID, String name, Integer pageNo, Integer pageSize, String sortBy, Boolean reverse){
+    Page<Product> findAll(Long productCategoryID, String name, Integer pageNo, Integer pageSize, String sortBy, Boolean reverse)  {
+        String key = "product:GetAll" +"_category:" + productCategoryID
+                + "_name:" + name + "_pageNo:" + pageNo + "_pageSize: " + pageSize +
+                "_sortBy:" + sortBy + "_reverse:" + reverse;
+        objectMapper.registerModule(new PageModule());
+        Optional<CacheData> optionalCacheData = cacheDataRepository.findById(key);
+        if (optionalCacheData.isPresent()){
+            String pageProductAsString = optionalCacheData.get().getValue();
+            TypeReference<Page<Product>> mapType = new TypeReference<>() {
+            };
+            try{
+                return objectMapper.readValue(pageProductAsString, mapType);
+            }
+            catch (JsonProcessingException ignored){}
+        }
+        try{
+            Thread.sleep(3000);
+        }
+        catch (InterruptedException ignored) {
+        }
         if (pageNo == -1) {
             Pageable pageAndSortingRequest = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(reverse? Sort.Direction.DESC : Sort.Direction. ASC, sortBy));
-            return productRepository.findAllByQueries(productCategoryID, name, pageAndSortingRequest);
+            Page<Product> results =  productRepository.findAllByQueries(productCategoryID, name, pageAndSortingRequest);
+            cacheService.writeCache(key, results);
+            return results;
         }
         Pageable pageAndSortingRequest = PageRequest.of(pageNo, pageSize, Sort.by(reverse? Sort.Direction.DESC : Sort.Direction. ASC, sortBy));
-        return  productRepository.findAllByQueries(productCategoryID, name, pageAndSortingRequest);
+        Page<Product> results =  productRepository.findAllByQueries(productCategoryID, name, pageAndSortingRequest);
+        cacheService.writeCache(key, results);
+        return results;
     }
     byte[] getImage(Long id){
         Product currentProd = productRepository.findById(id)
@@ -62,6 +93,7 @@ public class ProductService {
         }
     }
     ProductDTO findById(Long id){
+
         Product product = productRepository.findById(id).orElseThrow(()->new CustomException("Không tìm thấy sản phẩm với mã " + id, HttpStatus.NOT_FOUND));
         Set<Topping> toppings = product.getProductToppings();
         System.out.println(toppings);
@@ -91,9 +123,10 @@ public class ProductService {
         }
         String uploadDir = "./src/main/resources/static/prod-img/" + saved.getId();
         CustomUtils.uploadFileToDirectory(uploadDir, multipartFile);
+        cacheService.destroyCache("product");
         return productMapper.modelTODto(saved);
     }
-
+    @Transactional(rollbackOn = {CustomException.class, Exception.class, Throwable.class})
     public ProductDTO update (Long id, AddProductRequest productRequest,  MultipartFile multipartFile){
         Product currentProd = productRepository.findById(id)
                 .orElseThrow(() -> new CustomException("Không tìm thấy sản phẩm với mã " + id, HttpStatus.NOT_FOUND));
@@ -119,6 +152,7 @@ public class ProductService {
         currentProd.setImage(fileName);
         String uploadDir = "./src/main/resources/static/prod-img/" + currentProd.getId();
         CustomUtils.uploadFileToDirectory(uploadDir, multipartFile);
+        cacheService.destroyCache("product");
         return productMapper.modelTODto(productRepository.save(currentProd));
     }
 

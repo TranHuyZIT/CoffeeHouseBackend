@@ -14,4 +14,5 @@ public class CheckOutInfoDTO {
     private Date deliveryTime;
     private String address;
     private String note;
+    private Long voucherId = null;
 }

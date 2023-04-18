@@ -12,7 +12,7 @@ import java.util.List;
 import static org.springframework.http.MediaType.IMAGE_PNG_VALUE;
 
 @RestController
-@RequestMapping("/api/v1/customer")
+@RequestMapping("/api/v1/user/customer")
 @RequiredArgsConstructor
 public class CustomerController {
     private final CustomerService customerService;
@@ -43,8 +43,8 @@ public class CustomerController {
         return new ResponseEntity<Customer>(customerService.insert(address, id, image), HttpStatus.OK);
     }
     @PutMapping("/{id}")
-    public ResponseEntity<Customer> update(@RequestParam("address") String address,
-                                           @RequestParam("image")MultipartFile image,
+    public ResponseEntity<Customer> update(@RequestParam(value="address", required = false) String address,
+                                           @RequestParam(value="image", required = false)MultipartFile image,
                                            @PathVariable Long id){
         return new ResponseEntity<Customer>(customerService.update(id, address, image), HttpStatus.OK);
     }

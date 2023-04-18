@@ -23,9 +23,9 @@ class VoucherRepositoryTest {
     void findAllAvailable_ShouldReturnNotOverLimitAndNotExpired_Case1() {
         // Given
             // Valid
-        Voucher voucher1 = new Voucher(1L,0.2F,1, CustomUtils.convertStringToDate("01-03-2023"), CustomUtils.convertStringToDate("10-03-2023"), 0, 0, new HashSet<>(), null, null);
+        Voucher voucher1 = new Voucher(1L,0.2F,100,1, CustomUtils.convertStringToDate("01-03-2023"),"", CustomUtils.convertStringToDate("10-03-2023"), 0L, 0L, new HashSet<>(), null, null);
             // Invalid
-        Voucher voucher2 = new Voucher(2L, 0.2F, 10, CustomUtils.convertStringToDate("01-02-2023"), CustomUtils.convertStringToDate("2-02-2023"), 10000, 0, new HashSet<>(), null, null);
+        Voucher voucher2 = new Voucher(2L, 0.2F,100,  10, CustomUtils.convertStringToDate("01-02-2023"),"", CustomUtils.convertStringToDate("2-02-2023"), 10000L, 0L, new HashSet<>(), null, null);
         Voucher record1 = undertest.save(voucher1);
         Voucher record2 = undertest.save(voucher2);
 
@@ -41,9 +41,9 @@ class VoucherRepositoryTest {
     void findAllAvailable_ShouldReturnNotOverLimitAndNotExpired_Case2() {
         // Given
         // Valid
-        Voucher voucher1 = new Voucher(1L,0.2F,1, CustomUtils.convertStringToDate("01-03-2023"), CustomUtils.convertStringToDate("10-03-2023"), 0, 0, new HashSet<>(), null, null);
+        Voucher voucher1 = new Voucher(1L,0.2F,100,1, CustomUtils.convertStringToDate("01-03-2023"),"", CustomUtils.convertStringToDate("10-03-2023"), 0L, 0L, new HashSet<>(), null, null);
         // Invalid
-        Voucher voucher2 = new Voucher(2L, 0.2F, 0, CustomUtils.convertStringToDate("01-03-2023"), CustomUtils.convertStringToDate("2-03-2023"), 10000, 0, new HashSet<>(), null, null);
+        Voucher voucher2 = new Voucher(2L, 0.2F, 100, 0, CustomUtils.convertStringToDate("01-03-2023"),"", CustomUtils.convertStringToDate("2-03-2023"), 10000L, 0L, new HashSet<>(), null, null);
         Voucher record1 = undertest.save(voucher1);
         Voucher record2 = undertest.save(voucher2);
 
@@ -58,9 +58,9 @@ class VoucherRepositoryTest {
     void findAllAvailable_ShouldReturnNotOverLimitAndNotExpired_Case3() {
         // Given
         // Valid
-        Voucher voucher1 = new Voucher(1L,0.2F,0, CustomUtils.convertStringToDate("01-02-2023"), CustomUtils.convertStringToDate("10-02-2023"), 0, 0, new HashSet<>(), null, null);
+        Voucher voucher1 = new Voucher(1L,0.2F,20,0, CustomUtils.convertStringToDate("01-02-2023"),"", CustomUtils.convertStringToDate("10-02-2023"), 0L, 0L, new HashSet<>(), null, null);
         // Invalid
-        Voucher voucher2 = new Voucher(2L, 0.2F, 0, CustomUtils.convertStringToDate("01-03-2023"), CustomUtils.convertStringToDate("2-03-2023"), 10000, 0, new HashSet<>(), null, null);
+        Voucher voucher2 = new Voucher(2L, 0.2F,20, 0, CustomUtils.convertStringToDate("01-03-2023"),"", CustomUtils.convertStringToDate("2-03-2023"), 10000L, 0L, new HashSet<>(), null, null);
         Voucher record1 = undertest.save(voucher1);
         Voucher record2 = undertest.save(voucher2);
 
@@ -77,9 +77,9 @@ class VoucherRepositoryTest {
     void findAllAvailable_ShouldReturnNotOverLimitAndNotExpired_Case4() {
         // Given
         // Valid
-        Voucher voucher1 = new Voucher(1L,0.2F,1, CustomUtils.convertStringToDate("01-02-2023"), CustomUtils.convertStringToDate("10-02-2023"), 0, 0, new HashSet<>(), null, null);
+        Voucher voucher1 = new Voucher(1L,0.2F,20,1, CustomUtils.convertStringToDate("01-02-2023"),"", CustomUtils.convertStringToDate("10-02-2023"), 0L, 0L, new HashSet<>(), null, null);
         // Invalid
-        Voucher voucher2 = new Voucher(2L, 0.2F, -1, CustomUtils.convertStringToDate("01-03-2023"), CustomUtils.convertStringToDate("2-03-2023"), 10000, 0, new HashSet<>(), null, null);
+        Voucher voucher2 = new Voucher(2L, 0.2F,20, -1, CustomUtils.convertStringToDate("01-03-2023"),"", CustomUtils.convertStringToDate("2-03-2023"), 10000L, 0L, new HashSet<>(), null, null);
         Voucher record1 = undertest.save(voucher1);
         Voucher record2 = undertest.save(voucher2);
         System.out.println(voucher1);
@@ -98,9 +98,9 @@ class VoucherRepositoryTest {
     void findAllAvailable_ShouldReturnNotOverLimitAndNotExpired_Case5() {
         // Given
         // Valid
-        Voucher voucher1 = new Voucher(1L,0.2F,1, CustomUtils.convertStringToDate("01-03-2023"), CustomUtils.convertStringToDate("01-03-2023"), 0, 0, new HashSet<>(), null, null);
+        Voucher voucher1 = new Voucher(1L,0.2F,100,1, CustomUtils.convertStringToDate("01-03-2023"),"", CustomUtils.convertStringToDate("01-03-2023"), 0L, 0L, new HashSet<>(), null, null);
         // Invalid
-        Voucher voucher2 = new Voucher(2L, 0.2F, 0, CustomUtils.convertStringToDate("01-03-2023"), CustomUtils.convertStringToDate("01-03-2023"), 10000, 0, new HashSet<>(), null, null);
+        Voucher voucher2 = new Voucher(2L, 0.2F,100, 0, CustomUtils.convertStringToDate("01-03-2023"),"", CustomUtils.convertStringToDate("01-03-2023"), 10000L, 0L, new HashSet<>(), null, null);
         Voucher record1 = undertest.save(voucher1);
         Voucher record2 = undertest.save(voucher2);
         System.out.println(voucher1);
@@ -119,9 +119,9 @@ class VoucherRepositoryTest {
     void findAllAvailable_ShouldReturnNotOverLimitAndNotExpired_Case6() {
         // Given
         // Valid
-        Voucher voucher1 = new Voucher(1L,0.2F,10, CustomUtils.convertStringToDate("10-02-2023"), CustomUtils.convertStringToDate("1-02-2023"), 0, 0, new HashSet<>(), null, null);
+        Voucher voucher1 = new Voucher(1L,0.2F,100, 10, CustomUtils.convertStringToDate("10-02-2023"),"", CustomUtils.convertStringToDate("1-02-2023"), 0L, 0L, new HashSet<>(), null, null);
         // Invalid
-        Voucher voucher2 = new Voucher(2L, 0.2F, 1, CustomUtils.convertStringToDate("01-03-2023"), CustomUtils.convertStringToDate("2-03-2023"), 10000, 0, new HashSet<>(), null, null);
+        Voucher voucher2 = new Voucher(2L, 0.2F,100, 1, CustomUtils.convertStringToDate("01-03-2023"),"", CustomUtils.convertStringToDate("2-03-2023"), 10000L, 0L, new HashSet<>(), null, null);
         Voucher record1 = undertest.save(voucher1);
         Voucher record2 = undertest.save(voucher2);
         System.out.println(voucher1);

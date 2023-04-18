@@ -2,6 +2,7 @@ package com.tma.coffeehouse.Cart.DTO;
 
 import com.tma.coffeehouse.CartDetails.DTO.DetailOfCartDTO;
 import com.tma.coffeehouse.Customers.Customer;
+import com.tma.coffeehouse.Voucher.Voucher;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
 import lombok.AllArgsConstructor;
@@ -23,6 +24,8 @@ public class GetFullCartDTO {
     private String note = "";
     private Customer customer;
     private Long tongtien ;
+    private Long discount = 0L;
+    private Voucher voucher;
     Timestamp createdAt;
     Timestamp updatedAt;
     Set<DetailOfCartDTO> details = new HashSet<>();

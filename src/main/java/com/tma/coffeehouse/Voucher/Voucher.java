@@ -8,6 +8,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
 
 import java.sql.Timestamp;
 import java.util.Date;
@@ -20,6 +22,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Audited
 public class Voucher {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -48,6 +51,7 @@ public class Voucher {
             joinColumns = @JoinColumn(name = "voucherId"),
             inverseJoinColumns = @JoinColumn(name = "productId")
     )
+    @NotAudited
     Set<Product> products = new HashSet<>();
     @CreationTimestamp
     @Column(updatable = false)

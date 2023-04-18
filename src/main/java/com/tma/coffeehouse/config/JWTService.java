@@ -50,12 +50,9 @@ public class JWTService {
         return claimsResolver.apply(claims);
     }
     private Claims extractAllClaims(String token){
-        try{
-            return Jwts.parserBuilder().setSigningKey(getSecretKey()).build().parseClaimsJws(token).getBody();
-        }
-        catch (ExpiredJwtException e){
-            throw new CustomException("JWT expired", HttpStatus.UNAUTHORIZED);
-        }
+
+        return Jwts.parserBuilder().setSigningKey(getSecretKey()).build().parseClaimsJws(token).getBody();
+
     }
     public void throwExpiredError(String authHeader,String token){
         throw new ExpiredJwtException(null, this.extractAllClaims(token), "");

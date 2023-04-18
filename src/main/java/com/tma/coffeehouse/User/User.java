@@ -1,5 +1,7 @@
 package com.tma.coffeehouse.User;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.tma.coffeehouse.config.Serializer.CustomAuthorityDeserializer;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -44,6 +46,7 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Role role;
     @Override
+    @JsonDeserialize(using = CustomAuthorityDeserializer.class)
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));
     }

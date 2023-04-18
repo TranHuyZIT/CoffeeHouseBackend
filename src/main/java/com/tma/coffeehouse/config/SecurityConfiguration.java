@@ -9,6 +9,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -44,12 +45,13 @@ public class SecurityConfiguration {
                 .disable()
 //                .authorizeHttpRequests()
 //                .requestMatchers("/api/v1/auth/*") // add Whitelist (endpoint without using jwt)
-                .authorizeHttpRequests()
-                .anyRequest()
-                .permitAll()
+                .authorizeHttpRequests((requests) ->
+                        requests.requestMatchers(new AntPathRequestMatcher("/api/v1/admin/*")).hasAuthority("ADMIN")
+                                .requestMatchers(new AntPathRequestMatcher("/api/v1/user/*")).hasAnyAuthority("USER", "ADMIN")
+                                .anyRequest().permitAll()
+                )
 //                .anyRequest()
 //                .authenticated()
-                .and()
                 .exceptionHandling()
                 .authenticationEntryPoint(authenticationEntryPoint)
                 .and()

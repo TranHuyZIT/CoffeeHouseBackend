@@ -2,6 +2,7 @@ package com.tma.coffeehouse.config;
 
 import com.tma.coffeehouse.User.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;

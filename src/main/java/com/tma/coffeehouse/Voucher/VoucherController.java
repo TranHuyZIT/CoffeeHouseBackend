@@ -2,6 +2,7 @@ package com.tma.coffeehouse.Voucher;
 
 import com.tma.coffeehouse.Voucher.DTO.AddVoucherDTO;
 import com.tma.coffeehouse.Voucher.DTO.VoucherDTO;
+import com.tma.coffeehouse.Voucher.DTO.VoucherForCartDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -11,12 +12,12 @@ import java.util.List;
 import java.util.Set;
 
 @RestController
-@RequestMapping("/api/v1/voucher")
+@RequestMapping("/api/v1")
 @RequiredArgsConstructor
 public class VoucherController {
     private final VoucherServiceImpl voucherServiceImpl;
 
-    @GetMapping
+    @GetMapping("/voucher")
     @ResponseStatus(HttpStatus.OK)
     public Page<Voucher> findAll(
             @RequestParam(defaultValue = "0", name="pageNo", required = false) Integer pageNo,
@@ -25,30 +26,30 @@ public class VoucherController {
             @RequestParam(defaultValue = "true", name="reverse") boolean reverse){
         return voucherServiceImpl.findAll(pageNo - 1, pageSize, sortBy, reverse);
     }
-    @PostMapping
+    @PostMapping("/admin/voucher")
     @ResponseStatus(HttpStatus.CREATED)
     public VoucherDTO insert(@RequestBody AddVoucherDTO addVoucherDTO){
         return voucherServiceImpl.insert(addVoucherDTO);
     }
-    @PutMapping("/{id}")
+    @PutMapping("/admin/voucher/{id}")
     @ResponseStatus(HttpStatus.OK)
     public VoucherDTO update(@PathVariable  Long id,@RequestBody AddVoucherDTO addVoucherDTO){
         return voucherServiceImpl.update(id, addVoucherDTO);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/admin/voucher/{id}")
     @ResponseStatus(HttpStatus.OK)
     public VoucherDTO delete(@PathVariable Long id){
         return voucherServiceImpl.delete(id);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/voucher/{id}")
     @ResponseStatus(HttpStatus.OK)
     public VoucherDTO getOne(@PathVariable Long id) {
         return voucherServiceImpl.findById(id);
     }
-    @GetMapping("/cartValid/{id}")
-    public Set<VoucherDTO> getAllValidForCart(@PathVariable Long id){
+    @GetMapping("/user/voucher/cart/{id}")
+    public VoucherForCartDTO getAllValidForCart(@PathVariable Long id){
         return voucherServiceImpl.findAllVoucherForCart(id);
     }
 }

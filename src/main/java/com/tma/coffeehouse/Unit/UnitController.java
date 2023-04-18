@@ -7,27 +7,27 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/unit")
+@RequestMapping("/api/v1")
 @RequiredArgsConstructor
 public class UnitController {
     private final UnitService unitService;
-    @GetMapping
+    @GetMapping("/unit")
     public List<UnitDTO> findAll() {
         return unitService.findAll();
     }
-    @GetMapping("/{id}")
+    @GetMapping("/unit/{id}")
     public UnitDTO findById(@PathVariable long id){
         return unitService.findById(id);
     }
-    @PostMapping
+    @PostMapping("/admin/unit")
     public UnitDTO insert(@RequestBody Unit unit){
         return unitService.insert(unit);
     }
-    @PutMapping("/{id}")
+    @PutMapping("/admin/unit/{id}")
     public UnitDTO update(@PathVariable long id, @RequestBody Unit newUnit){
         return unitService.update(id, newUnit);
     }
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/admin/unit/{id}")
     public UnitDTO delete(@PathVariable long id){
         return unitService.delete(id);
     }

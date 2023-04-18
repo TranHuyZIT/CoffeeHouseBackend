@@ -40,10 +40,11 @@ public class UserService {
         User currentUser = userRepository.findById(id).orElseThrow(
                 () -> new CustomException("Không tìm thấy user với mã " + id, HttpStatus.NOT_FOUND)
         );
-        currentUser.setRole(newUser.getRole());
+        if (newUser.getRole() != null){
+            currentUser.setRole(newUser.getRole());
+        }
         currentUser.setName(newUser.getName());
         currentUser.setPhone(newUser.getPhone());
-        currentUser.setGender(newUser.getGender());
         currentUser.setEmail(newUser.getEmail());
         userRepository.save(currentUser);
         return userListResponseMapper.modelToDTO(currentUser);

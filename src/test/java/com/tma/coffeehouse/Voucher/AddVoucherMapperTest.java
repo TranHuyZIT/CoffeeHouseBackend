@@ -33,9 +33,9 @@ class AddVoucherMapperTest {
         builder.startDate(CustomUtils.convertStringToDate("01-03-2023"));
         builder.endDate(CustomUtils.convertStringToDate("10-03-2023"));
         builder.limitNumber(500);
-        builder.minOrderTotal(50000);
+        builder.minOrderTotal(50000L);
         builder.percentage(30.0F);
-        builder.maxDiscount(25000);
+        builder.maxDiscount(25000L);
         builder.productsId(new Long[] {1L, 2L});
         // When
         when(productRepository.findById(any(Long.class))).thenReturn(Optional.of(new Product()));

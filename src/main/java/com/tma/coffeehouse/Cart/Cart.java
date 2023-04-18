@@ -1,6 +1,7 @@
 package com.tma.coffeehouse.Cart;
 
 import com.tma.coffeehouse.Customers.Customer;
+import com.tma.coffeehouse.Voucher.Voucher;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,6 +28,8 @@ public class Cart {
     private String note = "";
     @OneToOne(optional = false)
     private Customer customer;
+    @OneToOne
+    Voucher voucher;
     @CreationTimestamp
     @Column(updatable = false)
     Timestamp createdAt;

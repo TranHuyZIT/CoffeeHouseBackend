@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.data.redis.core.RedisHash;
 
 import java.sql.Timestamp;
 import java.util.HashSet;
@@ -31,9 +32,9 @@ public class Product {
     @JoinTable(
             name = "product_topping",
             joinColumns = @JoinColumn(name = "productID"),
-            inverseJoinColumns = @JoinColumn(name = "toppingID")
+            inverseJoinColumns = @JoinColumn(name = "toppingID"),
+            indexes = {@Index(name = "idx_topping", columnList = "toppingid")}
     )
-
     private Set<Topping> productToppings = new HashSet<>();
     @Column(nullable = false)
     private String name;

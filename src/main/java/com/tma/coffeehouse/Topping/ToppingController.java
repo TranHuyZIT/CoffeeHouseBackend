@@ -11,17 +11,17 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("api/v1/topping")
+@RequestMapping("api/v1")
 @RequiredArgsConstructor
 public class ToppingController {
     private final ToppingService toppingService;
 
-    @PostMapping
+    @PostMapping("/admin/topping")
     @ResponseStatus(HttpStatus.CREATED)
     public ToppingDTO insert(@RequestBody AddToppingDTO addToppingDTO) {
         return toppingService.insert(addToppingDTO);
     }
-    @GetMapping
+    @GetMapping("/topping")
     @ResponseStatus(HttpStatus.OK)
     public Page<Topping> findAll(@RequestParam(required = false, defaultValue = "0", name = "productId") Long productId ,
                                  @RequestParam(name="name", defaultValue = "") String name,
@@ -31,17 +31,17 @@ public class ToppingController {
                                  @RequestParam(defaultValue = "true", name="reverse") boolean reverse ){
         return toppingService.findAll(productId, name, pageNo - 1, pageSize, sortBy, reverse);
     }
-    @GetMapping("/{id}")
+    @GetMapping("/topping/{id}")
     @ResponseStatus(HttpStatus.OK)
     public ToppingDTO findOne (@PathVariable Long id){
         return toppingService.findOne(id);
     }
-    @PutMapping("/{id}")
+    @PutMapping("/admin/topping/{id}")
     @ResponseStatus(HttpStatus.OK)
     public ToppingDTO update(@PathVariable Long id, @RequestBody AddToppingDTO addToppingDTO){
         return toppingService.update(id, addToppingDTO);
     }
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/admin/topping/{id}")
     @ResponseStatus(HttpStatus.OK)
     public ToppingDTO delete(@PathVariable Long id){
         return toppingService.delete(id);

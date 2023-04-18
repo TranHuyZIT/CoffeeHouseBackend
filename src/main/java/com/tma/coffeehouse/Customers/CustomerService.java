@@ -69,10 +69,13 @@ public class CustomerService {
     public Customer update(Long id, String address, MultipartFile multipartFile){
         Customer currentCustomer = customerRepository.findById(id)
                 .orElseThrow(() -> new CustomException("Không thể tìm thấy thông tin khách hàng với mã" + id, HttpStatus.NOT_FOUND));
-        String currentDir = "./src/main/resources/static/customer-img/" + currentCustomer.getId() ;
-        CustomUtils.deleteFile(currentDir + "/" + currentCustomer.getImage());
-        String fileName = StringUtils.cleanPath(Objects.requireNonNull(multipartFile.getOriginalFilename()));
-        CustomUtils.uploadFileToDirectory(currentDir, multipartFile);
+        String fileName = currentCustomer.getImage();
+        if (multipartFile != null){
+            String currentDir = "./src/main/resources/static/customer-img/" + currentCustomer.getId() ;
+            CustomUtils.deleteFile(currentDir + "/" + currentCustomer.getImage());
+             fileName = StringUtils.cleanPath(Objects.requireNonNull(multipartFile.getOriginalFilename()));
+            CustomUtils.uploadFileToDirectory(currentDir, multipartFile);
+        }
         Customer newCustomer =  Customer.builder()
                 .image(fileName)
                 .user(currentCustomer.getUser())

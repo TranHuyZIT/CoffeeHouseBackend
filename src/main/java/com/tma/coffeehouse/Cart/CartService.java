@@ -19,15 +19,21 @@ import com.tma.coffeehouse.Order.OrderRepository;
 import com.tma.coffeehouse.Order.OrderStatus;
 import com.tma.coffeehouse.OrderDetails.OrderDetail;
 import com.tma.coffeehouse.OrderDetails.OrderDetailRepository;
+import com.tma.coffeehouse.Product.Product;
 import com.tma.coffeehouse.Topping.Topping;
+import com.tma.coffeehouse.Voucher.Voucher;
+import com.tma.coffeehouse.Voucher.VoucherRepository;
+import com.tma.coffeehouse.config.Cache.CacheService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -36,11 +42,13 @@ public class CartService {
     private final CartDetailRepository cartDetailRepository;
     private final OrderRepository orderRepository;
     private final OrderDetailRepository orderDetailRepository;
+    private final VoucherRepository voucherRepository;
     private final CartDetailService cartDetailService;
     private final CartMapper cartMapper;
     private final AddCartDetailMapper addCartDetailMapper;
     private final DetailOfCartMapper detailOfCartMapper;
     private final CustomerService customerService;
+    private final CacheService cacheService;
     public CartDTO insert(Cart cart){
         return cartMapper.modelTODto(
                 cartRepository.save(cart)
@@ -52,16 +60,45 @@ public class CartService {
         Cart saved = cartRepository.save(current);
         return cartMapper.modelTODto(saved);
     }
+    public boolean isVoucherValid(GetFullCartDTO cart, Long voucherId){
+        Voucher voucher = voucherRepository.findById(voucherId).orElseThrow(
+                () -> new CustomException("Không tìm thấy voucher có mã là " + voucherId, HttpStatus.NOT_FOUND)
+        );
+        if (cart.getTongtien() < voucher.getMinOrderTotal()) return false;
+        Set<Product> productsOfCart = cart.getDetails().stream()
+                .map((DetailOfCartDTO::getProduct)).collect(Collectors.toSet());
+        for(Product product: voucher.getProducts()){
+            if (!productsOfCart.contains(product)){
+                return false;
+            }
+        }
+        return true;
+    }
 
     @Transactional(rollbackOn = {Exception.class, Throwable.class} )
     public Order checkOutCart(Long customerId, CheckOutInfoDTO checkOutInfoDTO){
-        System.out.println(checkOutInfoDTO);
         GetFullCartDTO cart = this.findOne(customerId);
+        if (checkOutInfoDTO.getVoucherId() != null){
+            Voucher voucher =  voucherRepository.findById(checkOutInfoDTO.getVoucherId()).orElseThrow(
+                    () -> new CustomException("Không tìm thấy voucher có mã này!", HttpStatus.NOT_FOUND)
+            );
+            cart.setVoucher(voucher);
+        }
+        if (checkOutInfoDTO.getVoucherId() != null && !isVoucherValid(cart, checkOutInfoDTO.getVoucherId())){
+            throw new CustomException("Voucher không còn hợp lệ!", HttpStatus.BAD_REQUEST);
+
+        }
+        this.addVoucher(customerId, checkOutInfoDTO.getVoucherId());
         Order.OrderBuilder newOrder = Order.builder();
         newOrder.status(OrderStatus.RECEIVED);
         newOrder.tongsl(this.calculateCartTotalAmount(cart));
-        newOrder.tongtien(cart.getTongtien());
-        newOrder.voucher(null);
+        newOrder.tongtien(this.calculateCartTotal(cart)[0]);
+        if (cart.getVoucher() != null){
+            Voucher voucher = cart.getVoucher();
+            voucher.setRemainingNumber(voucher.getRemainingNumber() - 1);
+            Voucher savedVoucher = voucherRepository.save(voucher);
+            newOrder.voucher(savedVoucher);
+        }
         newOrder.deliveryTime(checkOutInfoDTO.getDeliveryTime());
         newOrder.address(checkOutInfoDTO.getAddress());
         newOrder.customer(cart.getCustomer());
@@ -77,26 +114,32 @@ public class CartService {
             orderDetailRepository.save(newOrderDetail.build());
             this.deleteCartDetail(cartDetail.getId());
         }
+        cacheService.destroyCache("order");
         return savedOrder;
     }
 
-    public Long calculateCartTotal(CartDTO cart){
-        Set<CartDetail> cartDetails = cartDetailService.findAllByCartId(cart.getId());
-        Long total = 0L;
-        for(CartDetail cartDetail: cartDetails){
-            Long detailTotal = 0L;
-            detailTotal += cartDetail.getUnit().getPrice()
-                    + cartDetail.getProduct().getPrice();
-            for(Topping topping: cartDetail.getToppings()){
-                detailTotal += topping.getPrice();
-            }
-            detailTotal*= cartDetail.getSoluong();
-            total += detailTotal;
+    @Transactional(rollbackOn = {Exception.class, Throwable.class})
+    public CartDTO addVoucher(Long id, Long voucherId){
+        Customer currentCustomer = customerService.findOne(id);
+        Cart cart = cartRepository.findByCustomerId(currentCustomer.getId());
+        Voucher voucher = voucherRepository.findById(voucherId).orElseThrow(
+                () -> new CustomException("Không tìm thấy voucher với mã là " + voucherId ,HttpStatus.NOT_FOUND)
+        );
+        if (voucher.getRemainingNumber() == 0){
+            throw new CustomException("Voucher này đã hết!", HttpStatus.BAD_REQUEST);
         }
-        return total;
+        cart.setVoucher(voucher);
+        return cartMapper.modelTODto(cartRepository.save(cart));
+    }
+    public CartDTO deleteVoucher(Long id) {
+        Customer currentCustomer = customerService.findOne(id);
+        Cart cart = cartRepository.findByCustomerId(currentCustomer.getId());
+        cart.setVoucher(null);
+        cartRepository.save(cart);
+        return cartMapper.modelTODto(cart);
     }
 
-    public Long calculateCartTotal(GetFullCartDTO cart){
+    public Long[] calculateCartTotal(CartDTO cart){
         Set<CartDetail> cartDetails = cartDetailService.findAllByCartId(cart.getId());
         Long total = 0L;
         for(CartDetail cartDetail: cartDetails){
@@ -109,7 +152,35 @@ public class CartService {
             detailTotal*= cartDetail.getSoluong();
             total += detailTotal;
         }
-        return total;
+        Long discount = 0L;
+        if (cart.getVoucher() != null){
+            discount = Math.min((long)(total * cart.getVoucher().getPercentage()), cart.getVoucher().getMaxDiscount());
+            total -= discount;
+        }
+        return new Long[]{total, discount};
+    }
+
+    public Long[] calculateCartTotal(GetFullCartDTO cart){
+        Set<CartDetail> cartDetails = cartDetailService.findAllByCartId(cart.getId());
+        Long total = 0L;
+        Long discount = 0L;
+        Voucher voucher = cart.getVoucher();
+        for(CartDetail cartDetail: cartDetails){
+            Long detailTotal = 0L;
+            detailTotal += cartDetail.getUnit().getPrice()
+                    + cartDetail.getProduct().getPrice();
+
+            for(Topping topping: cartDetail.getToppings()){
+                detailTotal += topping.getPrice();
+            }
+            detailTotal*= cartDetail.getSoluong();
+            if (voucher != null && voucher.getProducts().contains(cartDetail.getProduct())){
+                discount += Math.min((long)(detailTotal * voucher.getPercentage()), voucher.getMaxDiscount());
+            }
+            total += detailTotal;
+        }
+        total -= discount;
+        return new Long[]{total, discount};
     }
     public Integer calculateCartTotalAmount(GetFullCartDTO cart){
         Set<CartDetail> cartDetails = cartDetailService.findAllByCartId(cart.getId());
@@ -140,7 +211,10 @@ public class CartService {
         getFullCartDTO.createdAt(cart.getCreatedAt());
         getFullCartDTO.updatedAt(cart.getUpdatedAt());
         getFullCartDTO.customer(cart.getCustomer());
-        getFullCartDTO.tongtien(this.calculateCartTotal(getFullCartDTO.build()));
+        getFullCartDTO.voucher(cart.getVoucher());
+        Long[] calc = this.calculateCartTotal(getFullCartDTO.build());
+        getFullCartDTO.tongtien(calc[0]);
+        getFullCartDTO.discount(calc[1]);
         Set<CartDetail> details = cartDetailService.findAllByCartId(cart.getId());
         Set<DetailOfCartDTO> detailOfCartDTOS = detailOfCartMapper.modelsTODTOS(details);
         getFullCartDTO.details(detailOfCartDTOS);

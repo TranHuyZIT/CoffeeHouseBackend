@@ -7,7 +7,9 @@ import com.tma.coffeehouse.ExceptionHandling.CustomException;
 import com.tma.coffeehouse.Product.Product;
 import com.tma.coffeehouse.Utils.CustomUtils;
 import com.tma.coffeehouse.Voucher.DTO.AddVoucherDTO;
+import com.tma.coffeehouse.Voucher.DTO.AlmostValidDTO;
 import com.tma.coffeehouse.Voucher.DTO.VoucherDTO;
+import com.tma.coffeehouse.Voucher.DTO.VoucherForCartDTO;
 import com.tma.coffeehouse.Voucher.Mapper.AddVoucherMapper;
 import com.tma.coffeehouse.Voucher.Mapper.VoucherMapper;
 import lombok.AllArgsConstructor;
@@ -30,9 +32,13 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class VoucherServiceImpl implements VoucherService {
     private final VoucherRepository voucherRepository;
-    private final VoucherMapper voucherMapper;
+    private VoucherMapper voucherMapper;
     private final CartService cartService;
     private final AddVoucherMapper addVoucherMapper;
+
+    public void setVoucherMapper(VoucherMapper voucherMapper){
+        this.voucherMapper = voucherMapper;
+    }
     public Page<Voucher> findAll(Integer pageNo, Integer pageSize, String sortBy, Boolean reverse) {
         if (pageNo == -1) {
             Pageable pageRequest = PageRequest.of(0, Integer.MAX_VALUE,
@@ -77,13 +83,12 @@ public class VoucherServiceImpl implements VoucherService {
         voucherRepository.delete(currentVoucher);
         return voucherMapper.modelTODto(currentVoucher);
     }
-    public Set<VoucherDTO> findAllVoucherForCart(Long customerId){
+    public VoucherForCartDTO findAllVoucherForCart(Long customerId){
         Set<Voucher> allVouchers = voucherRepository.findAllAvailable(CustomUtils.getDateWithoutTime());
         GetFullCartDTO cart = cartService.findOne(customerId);
         Long cartTotal = cart.getTongtien();
-        System.out.println(allVouchers);
-        System.out.println(cart);
         Set<VoucherDTO> validVouchers = new HashSet<>();
+        Set<AlmostValidDTO> almostValidVouchers = new HashSet<>();
         Set<Product> productsOfCart = cart.getDetails().stream()
                 .map((DetailOfCartDTO::getProduct)).collect(Collectors.toSet());
 
@@ -91,15 +96,21 @@ public class VoucherServiceImpl implements VoucherService {
         for(Voucher voucher: allVouchers) {
             if (cartTotal < voucher.getMinOrderTotal()) continue;
             boolean isValid = true;
+            Set<Product> missingProducts = new HashSet<>();
             for(Product product: voucher.getProducts()){
                 if (!productsOfCart.contains(product)){
-                    System.out.println(product);
                     isValid = false;
-                    break;
+                    missingProducts.add(product);
                 }
             }
             if (isValid) validVouchers.add(voucherMapper.modelTODto(voucher));
+            else{
+                AlmostValidDTO almostValidDTO = new AlmostValidDTO();
+                almostValidDTO.setVoucher(voucherMapper.modelTODto(voucher));
+                almostValidDTO.setProducts(missingProducts);
+                almostValidVouchers.add(almostValidDTO);
+            }
         }
-        return validVouchers;
+        return VoucherForCartDTO.builder().valid(validVouchers).almostValid(almostValidVouchers).build();
     }
 }

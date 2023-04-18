@@ -8,6 +8,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
+import org.hibernate.envers.RelationTargetAuditMode;
 
 import java.sql.Timestamp;
 
@@ -17,6 +20,7 @@ import java.sql.Timestamp;
 @NoArgsConstructor
 @Builder
 @Table(name = "customer")
+@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
 public class Customer {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,6 +32,7 @@ public class Customer {
     private String image;
 
     @OneToOne(optional = false)
+    @NotAudited
     @JoinColumn(name = "user_id")
     private User user;
 

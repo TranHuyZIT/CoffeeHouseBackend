@@ -2,6 +2,8 @@ package com.tma.coffeehouse.Voucher;
 
 import com.tma.coffeehouse.Voucher.DTO.AddVoucherDTO;
 import com.tma.coffeehouse.Voucher.DTO.VoucherDTO;
+import com.tma.coffeehouse.Voucher.DTO.VoucherForCartDTO;
+import com.tma.coffeehouse.Voucher.Mapper.VoucherMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +14,8 @@ public interface VoucherService {
     VoucherDTO findById(Long id);
      VoucherDTO insert(AddVoucherDTO addVoucherDTO);
      VoucherDTO update(long id, AddVoucherDTO addVoucherDTO);
-     Set<VoucherDTO> findAllVoucherForCart(Long customerId);
+     VoucherForCartDTO findAllVoucherForCart(Long customerId);
      VoucherDTO delete(Long id);
+
+    void setVoucherMapper(VoucherMapper voucherMapper);
 }

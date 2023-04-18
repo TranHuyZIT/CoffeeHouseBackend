@@ -6,11 +6,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/v1/account")
+@RequestMapping("/api/v1/")
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
-    @GetMapping
+    @GetMapping("admin/account")
     public Page<UserListResponseDTO> getAllUsers(
             @RequestParam(name="name", defaultValue = "") String name,
             @RequestParam(defaultValue = "0", name="pageNo") Integer pageNo,
@@ -21,11 +21,11 @@ public class UserController {
 
         return userService.getAll(name,pageNo - 1, pageSize, sortBy, reverse);
     }
-    @PutMapping("/{id}")
+    @PutMapping("user/account/{id}")
     public UserListResponseDTO update(@PathVariable Long id, @RequestBody User newUser){
         return userService.update(id, newUser);
     }
-    @DeleteMapping("/{id}")
+    @DeleteMapping("admin/account/{id}")
     public UserListResponseDTO delete(@PathVariable Long id){
         return userService.delete(id);
     }

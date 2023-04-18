@@ -1,5 +1,8 @@
 package com.tma.coffeehouse.Order;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tma.coffeehouse.Cart.DTO.CartDTO;
 import com.tma.coffeehouse.CartDetails.CartDetail;
 import com.tma.coffeehouse.ExceptionHandling.CustomException;
@@ -14,6 +17,10 @@ import com.tma.coffeehouse.OrderDetails.DTO.OrderDetailDTO;
 import com.tma.coffeehouse.OrderDetails.OrderDetail;
 import com.tma.coffeehouse.OrderDetails.OrderDetailService;
 import com.tma.coffeehouse.Topping.Topping;
+import com.tma.coffeehouse.config.Cache.CacheData;
+import com.tma.coffeehouse.config.Cache.CacheRepository;
+import com.tma.coffeehouse.config.Cache.CacheService;
+import com.tma.coffeehouse.config.Serializer.PageModule;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -23,10 +30,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.lang.reflect.Type;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -36,6 +41,9 @@ public class OrderService {
     private final AddOrderMapper addOrderMapper;
     private final FullOrderMapper fullOrderMapper;
     private final OrderMapper orderMapper;
+    private final CacheService cacheService;
+    private final CacheRepository cacheRepository;
+    private final ObjectMapper objectMapper;
 
     @Transactional(rollbackOn = {CustomException.class, Exception.class, Throwable.class})
     public FullOrderDTO insert(){
@@ -74,6 +82,7 @@ public class OrderService {
         currentOrder.setStatus(newOrder.getStatus());
         FullOrderDTO fullOrderDTO = fullOrderMapper.modelTODto(currentOrder);
         orderRepository.save(currentOrder);
+        cacheService.destroyCache("order");
         return fullOrderDTO;
     }
     public Long calculateOrderTotal(Long orderId){
@@ -107,16 +116,38 @@ public class OrderService {
         return fullOrderMapper.modelTODto(order);
     }
     public Page<Order> findAll(Long customerId, Integer pageNo, Integer pageSize, String sortBy, boolean reverse){
-        System.out.println(customerId);
+        String key = "order:GetAll" +"_customerId:" + customerId
+                 + "_pageNo:" + pageNo + "_pageSize: " + pageSize +
+                "_sortBy:" + sortBy + "_reverse:" + reverse;
+        objectMapper.registerModule(new PageModule());
+        Optional<CacheData> optionalCacheData = cacheRepository.findById(key);
+        if(optionalCacheData.isPresent()){
+            String pageOrderAsString = optionalCacheData.get().getValue();
+            TypeReference<Page<Order>> mapType= new TypeReference<Page<Order>>() {};
+            try{
+                return objectMapper.readValue(pageOrderAsString, mapType);
+            }
+            catch (JsonProcessingException ignored){}
+        }
+        try{
+            Thread.sleep(3000);
+        }
+        catch (InterruptedException ignored) {
+        }
         if (pageNo == -1){
             Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(reverse? Sort.Direction.DESC : Sort.Direction.ASC, sortBy));
-            return orderRepository.findAll(pageable);
+            Page<Order> results =  orderRepository.findAll(pageable);
+            cacheService.writeCache(key, results);
+            return results;
         }
         Pageable pageable = PageRequest.of(pageNo, pageSize, Sort.by(reverse? Sort.Direction.DESC : Sort.Direction.ASC, sortBy));
         if (customerId != null){
-
-            return orderRepository.findByCustomer_Id(customerId, pageable);
+            Page<Order> results =  orderRepository.findByCustomerId(customerId, pageable);
+            cacheService.writeCache(key, results);
+            return results;
         }
-        return orderRepository.findAll(pageable);
+        Page<Order> results = orderRepository.findAll(pageable);
+        cacheService.writeCache(key, results);
+        return results;
     }
 }

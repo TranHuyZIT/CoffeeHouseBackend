@@ -11,6 +11,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Fetch;
 
 import java.util.Set;
 
@@ -35,7 +36,7 @@ public class CartDetail {
     @JoinColumn(name = "unit_id")
     private Unit unit;
 
-    @ManyToMany
+    @ManyToMany(fetch=FetchType.EAGER)
     @JoinTable(
             name = "cartDetail_topping",
             joinColumns = @JoinColumn(name = "cdId"),
