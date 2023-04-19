@@ -15,6 +15,7 @@ import com.tma.coffeehouse.Voucher.Mapper.VoucherMapper;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -32,6 +33,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class VoucherServiceImpl implements VoucherService {
     private final VoucherRepository voucherRepository;
+    @Autowired
     private VoucherMapper voucherMapper;
     private final CartService cartService;
     private final AddVoucherMapper addVoucherMapper;

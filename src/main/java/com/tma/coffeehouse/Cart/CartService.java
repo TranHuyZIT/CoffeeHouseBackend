@@ -64,6 +64,11 @@ public class CartService {
         Voucher voucher = voucherRepository.findById(voucherId).orElseThrow(
                 () -> new CustomException("Không tìm thấy voucher có mã là " + voucherId, HttpStatus.NOT_FOUND)
         );
+        System.out.println(voucher.getStartDate());
+        System.out.println(voucher.getEndDate());
+        if (voucher.getRemainingNumber() < 0 || voucher.getStartDate().after(new Date())
+                || voucher.getEndDate().before(new Date())) return false;
+        if (cart == null)return true;
         if (cart.getTongtien() < voucher.getMinOrderTotal()) return false;
         Set<Product> productsOfCart = cart.getDetails().stream()
                 .map((DetailOfCartDTO::getProduct)).collect(Collectors.toSet());
@@ -88,17 +93,17 @@ public class CartService {
             throw new CustomException("Voucher không còn hợp lệ!", HttpStatus.BAD_REQUEST);
 
         }
-        this.addVoucher(customerId, checkOutInfoDTO.getVoucherId());
         Order.OrderBuilder newOrder = Order.builder();
-        newOrder.status(OrderStatus.RECEIVED);
-        newOrder.tongsl(this.calculateCartTotalAmount(cart));
-        newOrder.tongtien(this.calculateCartTotal(cart)[0]);
         if (cart.getVoucher() != null){
+            this.addVoucher(customerId, checkOutInfoDTO.getVoucherId());
             Voucher voucher = cart.getVoucher();
             voucher.setRemainingNumber(voucher.getRemainingNumber() - 1);
             Voucher savedVoucher = voucherRepository.save(voucher);
             newOrder.voucher(savedVoucher);
         }
+        newOrder.status(OrderStatus.RECEIVED);
+        newOrder.tongsl(this.calculateCartTotalAmount(cart));
+        newOrder.tongtien(this.calculateCartTotal(cart)[0]);
         newOrder.deliveryTime(checkOutInfoDTO.getDeliveryTime());
         newOrder.address(checkOutInfoDTO.getAddress());
         newOrder.customer(cart.getCustomer());
@@ -165,6 +170,9 @@ public class CartService {
         Long total = 0L;
         Long discount = 0L;
         Voucher voucher = cart.getVoucher();
+        if (voucher!= null && !isVoucherValid(null, voucher.getId())){
+            throw new CustomException("Không thể áp dụng voucher này", HttpStatus.BAD_REQUEST);
+        }
         for(CartDetail cartDetail: cartDetails){
             Long detailTotal = 0L;
             detailTotal += cartDetail.getUnit().getPrice()
@@ -175,6 +183,7 @@ public class CartService {
             }
             detailTotal*= cartDetail.getSoluong();
             if (voucher != null && voucher.getProducts().contains(cartDetail.getProduct())){
+
                 discount += Math.min((long)(detailTotal * voucher.getPercentage()), voucher.getMaxDiscount());
             }
             total += detailTotal;

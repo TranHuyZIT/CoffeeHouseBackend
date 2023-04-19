@@ -35,7 +35,8 @@ public class CacheService {
     public void destroyCache(String key){
         List<String> caches = this.findByKeyContainingIgnoreCase(key).stream()
                 .map((CacheData::getKey))
-                .toList();;
+                .toList();
+        if (caches.isEmpty()) return;
         cacheRepository.deleteAllById(caches);
     }
 }

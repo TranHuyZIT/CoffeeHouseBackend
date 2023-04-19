@@ -58,26 +58,32 @@ class VoucherServiceTest {
     private VoucherServiceImpl underTest;
     @Mock
     private AddVoucherMapper addVoucherMapper;
+    private Product product1En;
+    private Product product2En;
+    private Product product3En;
+    private Product product4En;
+    private Customer customerEn;
+
     @BeforeEach
     void init(){
         this.voucherMapper = new VoucherMapperImpl();
         this.underTest.setVoucherMapper(this.voucherMapper);
+        Product.ProductBuilder productBuilder = Product.builder();
+         product1En = productBuilder.productCategory(null)
+                .id(1L).name("Cà phê").productToppings(new HashSet<>()).image("").description("").price(20000).build();
+         product2En = productBuilder.productCategory(null)
+                .id(2L).name("Trà ô long").productToppings(new HashSet<>()).image("").description("").price(25000).build();
+         product3En = productBuilder.productCategory(null)
+                .id(3L).name("Sữa chua").productToppings(new HashSet<>()).image("").description("").price(30000).build();
+         product4En = productBuilder.productCategory(null)
+                .id(4L).name("Cà phê sữa").productToppings(new HashSet<>()).image("").description("").price(15000).build();
+         customerEn = new Customer(1L, "", "", new User(), null, null);
     }
 
     @Test
     void itShouldFindAllVoucherAvailableForACart_WhenCartDetailContainAllProductsOfAVoucher() {
         Product.ProductBuilder productBuilder = Product.builder();
         // GIVEN
-        //  Creating product
-        Product product1En = productBuilder.productCategory(null)
-                .id(1L).name("Cà phê").productToppings(new HashSet<>()).image("").description("").price(20000).build();
-        Product product2En = productBuilder.productCategory(null)
-                .id(2L).name("Trà ô long").productToppings(new HashSet<>()).image("").description("").price(25000).build();
-        Product product3En = productBuilder.productCategory(null)
-                .id(3L).name("Sữa chua").productToppings(new HashSet<>()).image("").description("").price(30000).build();
-        Product product4En = productBuilder.productCategory(null)
-                .id(4L).name("Cà phê sữa").productToppings(new HashSet<>()).image("").description("").price(15000).build();
-
         //  Create Vouchers
         Voucher.VoucherBuilder voucherBuilder = Voucher.builder();
         Set<Product> voucher1Products = new HashSet<>();
@@ -97,9 +103,7 @@ class VoucherServiceTest {
         Set<Voucher> allAvailables = new HashSet<>();
         allAvailables.add(voucher1En);
         allAvailables.add(voucher2En);
-
-        //  Create Customer
-        Customer customerEn = new Customer(1L, "", "", new User(), null, null);
+        
 
         //  Create Cart Detail
         DetailOfCartDTO detailOfCartDTO1 = DetailOfCartDTO.builder()
@@ -144,14 +148,7 @@ class VoucherServiceTest {
         Product.ProductBuilder productBuilder = Product.builder();
         // GIVEN
         //  Creating product
-        Product product1En = productBuilder.productCategory(null)
-                .id(1L).name("Cà phê").productToppings(new HashSet<>()).image("").description("").price(20000).build();
-        Product product2En = productBuilder.productCategory(null)
-                .id(2L).name("Trà ô long").productToppings(new HashSet<>()).image("").description("").price(25000).build();
-        Product product3En = productBuilder.productCategory(null)
-                .id(3L).name("Sữa chua").productToppings(new HashSet<>()).image("").description("").price(30000).build();
-        Product product4En = productBuilder.productCategory(null)
-                .id(4L).name("Cà phê sữa").productToppings(new HashSet<>()).image("").description("").price(15000).build();
+        
 
         //  Create Vouchers
         Voucher.VoucherBuilder voucherBuilder = Voucher.builder();
@@ -174,7 +171,7 @@ class VoucherServiceTest {
         allAvailables.add(voucher2En);
 
         //  Create Customer
-        Customer customerEn = new Customer(1L, "", "", new User(), null, null);
+        
 
         //  Create Cart Detail
         DetailOfCartDTO detailOfCartDTO1 = DetailOfCartDTO.builder()
@@ -213,14 +210,7 @@ class VoucherServiceTest {
         Product.ProductBuilder productBuilder = Product.builder();
         // GIVEN
         //  Creating product
-        Product product1En = productBuilder.productCategory(null)
-                .id(1L).name("Cà phê").productToppings(new HashSet<>()).image("").description("").price(20000).build();
-        Product product2En = productBuilder.productCategory(null)
-                .id(2L).name("Trà ô long").productToppings(new HashSet<>()).image("").description("").price(25000).build();
-        Product product3En = productBuilder.productCategory(null)
-                .id(3L).name("Sữa chua").productToppings(new HashSet<>()).image("").description("").price(30000).build();
-        Product product4En = productBuilder.productCategory(null)
-                .id(4L).name("Cà phê sữa").productToppings(new HashSet<>()).image("").description("").price(15000).build();
+        
 
         //  Create Vouchers
         Voucher.VoucherBuilder voucherBuilder = Voucher.builder();
@@ -245,7 +235,7 @@ class VoucherServiceTest {
         allAvailables.add(voucher2En);
 
         //  Create Customer
-        Customer customerEn = new Customer(1L, "", "", new User(), null, null);
+        
 
         //  Create Cart Detail
         DetailOfCartDTO detailOfCartDTO1 = DetailOfCartDTO.builder()
@@ -292,14 +282,7 @@ class VoucherServiceTest {
         Product.ProductBuilder productBuilder = Product.builder();
         // GIVEN
         //  Creating product
-        Product product1En = productBuilder.productCategory(null)
-                .id(1L).name("Cà phê").productToppings(new HashSet<>()).image("").description("").price(20000).build();
-        Product product2En = productBuilder.productCategory(null)
-                .id(2L).name("Trà ô long").productToppings(new HashSet<>()).image("").description("").price(25000).build();
-        Product product3En = productBuilder.productCategory(null)
-                .id(3L).name("Sữa chua").productToppings(new HashSet<>()).image("").description("").price(30000).build();
-        Product product4En = productBuilder.productCategory(null)
-                .id(4L).name("Cà phê sữa").productToppings(new HashSet<>()).image("").description("").price(15000).build();
+        
 
         //  Create Vouchers
         Voucher.VoucherBuilder voucherBuilder = Voucher.builder();
@@ -326,7 +309,7 @@ class VoucherServiceTest {
 
 
         //  Create Customer
-        Customer customerEn = new Customer(1L, "", "", new User(), null, null);
+        
 
         //  Create Cart Detail
         DetailOfCartDTO detailOfCartDTO1 = DetailOfCartDTO.builder()

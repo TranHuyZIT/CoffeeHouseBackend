@@ -30,9 +30,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.Type;
-import java.util.*;
 
+import java.util.*;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 @Service
 @RequiredArgsConstructor
 public class OrderService {
@@ -68,18 +68,20 @@ public class OrderService {
         }
         Order newOrder = addOrderMapper.dtoTOModel(addOrderDTO);
         Set<AddOrderDetailDTO> details = addOrderDTO.getDetails();
+        Integer tongsl = 0;
         for(AddOrderDetailDTO detail: details){
             detail.setOrderId(id);
+            tongsl += detail.getSoluong();
             OrderDetailDTO orderDetailDTO= orderDetailService.insert(detail);
         }
         currentOrder.setTongtien(calculateOrderTotal(id));
-        currentOrder.setTongsl(details.size());
+        currentOrder.setTongsl(tongsl);
         currentOrder.setAddress(newOrder.getAddress());
         currentOrder.setNote(newOrder.getNote());
         currentOrder.setCustomer(newOrder.getCustomer());
         currentOrder.setDeliveryTime(newOrder.getDeliveryTime());
         currentOrder.setVoucher(newOrder.getVoucher());
-        currentOrder.setStatus(newOrder.getStatus());
+        currentOrder.setStatus(newOrder.getStatus() == null ? OrderStatus.RECEIVED : newOrder.getStatus());
         FullOrderDTO fullOrderDTO = fullOrderMapper.modelTODto(currentOrder);
         orderRepository.save(currentOrder);
         cacheService.destroyCache("order");
