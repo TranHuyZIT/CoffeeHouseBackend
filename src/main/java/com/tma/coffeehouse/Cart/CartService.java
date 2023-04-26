@@ -21,6 +21,7 @@ import com.tma.coffeehouse.OrderDetails.OrderDetail;
 import com.tma.coffeehouse.OrderDetails.OrderDetailRepository;
 import com.tma.coffeehouse.Product.Product;
 import com.tma.coffeehouse.Topping.Topping;
+import com.tma.coffeehouse.Utils.CustomUtils;
 import com.tma.coffeehouse.Voucher.Voucher;
 import com.tma.coffeehouse.Voucher.VoucherRepository;
 import com.tma.coffeehouse.config.Cache.CacheService;
@@ -49,6 +50,7 @@ public class CartService {
     private final DetailOfCartMapper detailOfCartMapper;
     private final CustomerService customerService;
     private final CacheService cacheService;
+    private final CustomUtils customUtils;
     public CartDTO insert(Cart cart){
         return cartMapper.modelTODto(
                 cartRepository.save(cart)
@@ -83,6 +85,7 @@ public class CartService {
     @Transactional(rollbackOn = {Exception.class, Throwable.class} )
     public Order checkOutCart(Long customerId, CheckOutInfoDTO checkOutInfoDTO){
         GetFullCartDTO cart = this.findOne(customerId);
+        System.out.println(cart.getVoucher());
         if (checkOutInfoDTO.getVoucherId() != null){
             Voucher voucher =  voucherRepository.findById(checkOutInfoDTO.getVoucherId()).orElseThrow(
                     () -> new CustomException("Không tìm thấy voucher có mã này!", HttpStatus.NOT_FOUND)
@@ -91,8 +94,8 @@ public class CartService {
         }
         if (checkOutInfoDTO.getVoucherId() != null && !isVoucherValid(cart, checkOutInfoDTO.getVoucherId())){
             throw new CustomException("Voucher không còn hợp lệ!", HttpStatus.BAD_REQUEST);
-
         }
+        String bodyMail = "Chào bạn, cảm ơn đã đặt một đơn hàng tại the Coffee House, chi tiết đơn hàng: \n";
         Order.OrderBuilder newOrder = Order.builder();
         if (cart.getVoucher() != null){
             this.addVoucher(customerId, checkOutInfoDTO.getVoucherId());
@@ -100,17 +103,27 @@ public class CartService {
             voucher.setRemainingNumber(voucher.getRemainingNumber() - 1);
             Voucher savedVoucher = voucherRepository.save(voucher);
             newOrder.voucher(savedVoucher);
+            bodyMail += "   - Áp dụng voucher giảm " + cart.getVoucher().getPercentage()* 100 + "% cho đơn hàng này.\n";
         }
         newOrder.status(OrderStatus.RECEIVED);
         newOrder.tongsl(this.calculateCartTotalAmount(cart));
-        newOrder.tongtien(this.calculateCartTotal(cart)[0]);
+        Long[] result = this.calculateCartTotal(cart);
+        newOrder.tongtien(result[0]);
+
+        bodyMail += "   - Tổng tiền: " + result[0] + "đ.\n";
+        bodyMail += "   - Giảm giá: " + result[1] + "đ.\n";
+        bodyMail += "   - Địa chỉ: " + checkOutInfoDTO.getAddress() + ".\n";
+        bodyMail += "   - Thời gian: " + checkOutInfoDTO.getDeliveryTime() + ".\n";
+        bodyMail += "   - Chi tiết:\n";
         newOrder.deliveryTime(checkOutInfoDTO.getDeliveryTime());
         newOrder.address(checkOutInfoDTO.getAddress());
         newOrder.customer(cart.getCustomer());
         newOrder.note(checkOutInfoDTO.getNote());
         Order savedOrder = orderRepository.save(newOrder.build());
+
         for(DetailOfCartDTO cartDetail : cart.getDetails()){
             OrderDetail.OrderDetailBuilder newOrderDetail = OrderDetail.builder();
+            bodyMail +=  "      + " + cartDetail.getProduct() + "\n";
             newOrderDetail.order(savedOrder);
             newOrderDetail.unit(cartDetail.getUnit());
             newOrderDetail.soluong(cartDetail.getSoluong());
@@ -119,9 +132,12 @@ public class CartService {
             orderDetailRepository.save(newOrderDetail.build());
             this.deleteCartDetail(cartDetail.getId());
         }
+        customUtils.pushEmailMessageQueue("Đơn hàng của bạn tại The Coffee House",
+                cart.getCustomer().getUser().getEmail(), bodyMail);
         cacheService.destroyCache("order");
         return savedOrder;
     }
+
 
     @Transactional(rollbackOn = {Exception.class, Throwable.class})
     public CartDTO addVoucher(Long id, Long voucherId){
@@ -171,7 +187,9 @@ public class CartService {
         Long discount = 0L;
         Voucher voucher = cart.getVoucher();
         if (voucher!= null && !isVoucherValid(null, voucher.getId())){
-            throw new CustomException("Không thể áp dụng voucher này", HttpStatus.BAD_REQUEST);
+            Cart currentcart = cartRepository.findByCustomerId(cart.getCustomer().getId());
+            currentcart.setVoucher(null);
+            cartRepository.save(currentcart);
         }
         for(CartDetail cartDetail: cartDetails){
             Long detailTotal = 0L;

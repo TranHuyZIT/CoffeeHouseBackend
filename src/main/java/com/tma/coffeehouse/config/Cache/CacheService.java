@@ -20,7 +20,7 @@ public class CacheService {
         List<CacheData> allData = (List<CacheData>) cacheRepository.findAll();
         System.out.println(allData);
         return allData.stream()
-                .filter(data -> data.getKey().toLowerCase().contains(key.toLowerCase()))
+                .filter(data -> data!= null && data.getKey().toLowerCase().contains(key.toLowerCase()))
                 .collect(Collectors.toList());
     }
     public void writeCache(String key, Object results){

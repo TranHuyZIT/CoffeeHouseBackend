@@ -1,9 +1,14 @@
 package com.tma.coffeehouse.auth;
 
+import com.tma.coffeehouse.Customers.Customer;
+import com.tma.coffeehouse.Customers.CustomerRepository;
+import com.tma.coffeehouse.Customers.CustomerService;
 import com.tma.coffeehouse.ExceptionHandling.CustomException;
 import com.tma.coffeehouse.User.*;
 import com.tma.coffeehouse.User.DTO.UserResponseDTO;
+import com.tma.coffeehouse.Utils.CustomUtils;
 import com.tma.coffeehouse.config.JWTService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,8 +25,12 @@ public class AuthService {
     private final JWTService jwtService;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
+    private final CustomUtils customUtils;
+    private final CustomerService customerService;
+    private final CustomerRepository customerRepository;
 
     private final AuthenticationManager authenticationManager;
+    @Transactional(rollbackOn = {Throwable.class, Exception.class})
     public AuthenticateResponse register(RegisterRequest request){
         String requestUsername = request.getUserName();
         Optional<User> existUser = userRepository.findByUserName(requestUsername);
@@ -36,7 +45,20 @@ public class AuthService {
                 .gender(request.getGender())
                 .build();
         User newUser = userRepository.save(user);
+        Customer customer = Customer.builder()
+                .image("user.png")
+                .address("")
+                .user(newUser)
+                .build();
+        Customer newCustomer = customerRepository.save(customer);
+        CustomUtils.copyFileToDirectory("./src/main/resources/static/customer-img/user.png",
+                "./src/main/resources/static/customer-img/" + newCustomer.getId());
         String token = jwtService.signToken(user);
+        customUtils.pushEmailMessageQueue("Cám Ơn Khách Hàng Đăng Ký Dịch Vụ The Coffee House!",
+                user.getEmail(),
+                String.format("Cảm ơn %s đã đăng ký dịch vụ của The Coffee House.\n" +
+                        "Từ đây bạn có thể đăng ký đặt hàng tại quán với tài khoản %s!. \n",
+                        user.getName(), user.getEmail()));
         return AuthenticateResponse.builder()
                 .token(token)
                 .id(newUser.getId())

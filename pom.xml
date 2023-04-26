@@ -17,6 +17,11 @@
 		<java.version>19</java.version>
 	</properties>
 	<dependencies>
+		<dependency>
+			<groupId>org.springframework.amqp</groupId>
+			<artifactId>spring-rabbit</artifactId>
+			<version>3.0.4</version>
+		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.data</groupId>

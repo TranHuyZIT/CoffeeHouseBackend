@@ -1,24 +1,31 @@
 package com.tma.coffeehouse.Utils;
 
 import com.tma.coffeehouse.ExceptionHandling.CustomException;
+import com.tma.coffeehouse.config.MQConfig.MQConfig;
+import com.tma.coffeehouse.config.MQConfig.QueueMessage;
+import lombok.RequiredArgsConstructor;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
+import java.nio.file.*;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Objects;
+import java.util.UUID;
 
+@Service
+@RequiredArgsConstructor
 public class CustomUtils {
+    private final RabbitTemplate template;
     public static Boolean deleteDirectory (File file){
         File[] contents = file.listFiles();
         if (contents != null) {
@@ -54,6 +61,18 @@ public class CustomUtils {
             throw new CustomException("Không thể lấy thời gian hiện tại", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+    public static void copyFileToDirectory(String dirToCopy, String dirDestination){
+        Path fileToCopy = Paths.get(dirToCopy);
+        Path destination = Paths.get(dirDestination);
+        try {
+            if (!Files.exists(destination)){
+                Files.createDirectories(destination);
+            }
+            Files.copy(fileToCopy, destination.resolve(fileToCopy.getFileName()), StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
     public static void uploadFileToDirectory(String uploadDir, MultipartFile multipartFile){
         Path uploadPath = Paths.get(uploadDir);
         String fileName = StringUtils.cleanPath(Objects.requireNonNull(multipartFile.getOriginalFilename()));
@@ -67,6 +86,11 @@ public class CustomUtils {
         }catch(IOException e){
             throw new CustomException("Có lỗi xảy ra khi upload file", HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    public void pushEmailMessageQueue(String subject, String toMail, String body){
+        QueueMessage email = new QueueMessage(UUID.randomUUID().toString(), subject, toMail, body, new Date());
+        template.convertAndSend(MQConfig.EXCHANGE, MQConfig.ROUTING_KEY, email);
     }
 
 }

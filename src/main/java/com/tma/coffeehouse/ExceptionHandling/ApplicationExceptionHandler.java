@@ -17,7 +17,7 @@ import java.util.Map;
 @RestControllerAdvice
 public class ApplicationExceptionHandler {
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    @ResponseStatus(HttpStatus.CONFLICT)
     public Map<String, String> handleAuthenticationException(AuthenticationException err){
         Map<String, String> errorMap = new HashMap<>();
         errorMap.put("message", "Thông tin đăng nhập không hợp lệ, vui lòng kiểm tra lại tài khoản và mật khẩu");
