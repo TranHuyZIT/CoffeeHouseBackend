@@ -27,6 +27,16 @@ public class ImageService {
                 .bodyToMono(String.class)
                 .block();
     }
+    public String insertImage(String type, String imageUrl){
+        MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
+        bodyBuilder.part("type", type);
+        bodyBuilder.part("imageUrl", imageUrl);
+        return webClient.post().uri(ImageServiceURL + "add-url")
+                .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
+                .retrieve()
+                .bodyToMono(String.class)
+                .block();
+    }
     public String updateImage(String id, String type, MultipartFile image){
         MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
         bodyBuilder.part("image", image.getResource());
