@@ -37,7 +37,7 @@ public class AuthController {
             Map<String, Object> claims =  firebaseToken.getClaims();
             System.out.println(claims);
             return new ResponseEntity<>(new AuthenticateResponse(idToken,
-                    Long.parseLong(firebaseToken.getUid()), firebaseToken.getName(),
+                    1L, firebaseToken.getName(),
                     firebaseToken.getTenantId(), firebaseToken.getEmail(), Gender.MALE, "", Role.USER), HttpStatus.OK);
         }
         catch (FirebaseAuthException e){
