@@ -123,7 +123,7 @@ class CartServiceTest {
                         1, 0L)
         );
          cartDetail2 = cartDetailRepository.save(
-                new CartDetail(null, product2En, newCart, unit1, new HashSet<>(Arrays.asList(topping1)), "",
+                new CartDetail(null, product2En, newCart, unit1, new HashSet<>(Collections.singletonList(topping1)), "",
                         1, 0L)
         );
          Set<DetailOfCartDTO> detailOfCartDTOS = detailOfCartMapper.modelsTODTOS(
@@ -201,20 +201,22 @@ class CartServiceTest {
         assertThat(result[1]).isEqualTo(0);
     }
     @Test
-    void calculateCartTotalShouldThrowExceptionWhenVoucherInvalid_Test1(){
+    void calculateCartTotalShouldCalculateTotalWithoutVoucherWhenVoucherInvalid_Test1(){
         Voucher voucher = voucherRepository.save(
                 new Voucher(null, (float)0.5, 0, 0, new Date(), "", new Date(), 15000L, 0L,
                         new HashSet<>(Arrays.asList(product1En, product2En)),null, null )
         );
         getFullCartDTO.setVoucher(voucher);
-        assertThatThrownBy(()->underTest.calculateCartTotal(getFullCartDTO)).isInstanceOf(CustomException.class);
+        Long [] result = underTest.calculateCartTotal(getFullCartDTO);
+        assertThat(result[0]).isEqualTo(100000L);
+        assertThat(result[1]).isEqualTo(0);
     }
     @Test
     void calculateCartTotalShouldCalculateCorrectlyWithVoucher_Test2(){
         Voucher voucher = voucherRepository.save(
                 new Voucher(null, (float)0.5, 10, 5,
                         CustomUtils.convertStringToDate("10-04-2023"), "",
-                        CustomUtils.convertStringToDate("30-04-2023"),
+                        CustomUtils.convertStringToDate("30-12-2023"),
                         15000L, 0L,
                         new HashSet<>(Arrays.asList(product3En)),null, null )
         );
@@ -228,7 +230,7 @@ class CartServiceTest {
         Voucher voucher = voucherRepository.save(
                 new Voucher(null, (float)0.5, 10, 5,
                         CustomUtils.convertStringToDate("10-04-2023"), "",
-                        CustomUtils.convertStringToDate("30-04-2023"),
+                        CustomUtils.convertStringToDate("30-12-2023"),
                         15000L, 0L,
                         new HashSet<>(Arrays.asList(product1En)),null, null )
         );
@@ -242,7 +244,7 @@ class CartServiceTest {
         Voucher voucher = voucherRepository.save(
                 new Voucher(null, (float)0.5, 10, 5,
                         CustomUtils.convertStringToDate("10-04-2023"), "",
-                        CustomUtils.convertStringToDate("30-04-2023"),
+                        CustomUtils.convertStringToDate("30-12-2023"),
                         50000L, 0L,
                         new HashSet<>(Arrays.asList(product1En)),null, null )
         );
@@ -266,7 +268,7 @@ class CartServiceTest {
         Voucher voucher = voucherRepository.save(
                 new Voucher(null, (float)0.5, 10, 5,
                         CustomUtils.convertStringToDate("10-04-2023"), "",
-                        CustomUtils.convertStringToDate("30-04-2023"),
+                        CustomUtils.convertStringToDate("30-12-2023"),
                         15000L, 0L,
                         new HashSet<>(Arrays.asList(product1En)),null, null )
         );

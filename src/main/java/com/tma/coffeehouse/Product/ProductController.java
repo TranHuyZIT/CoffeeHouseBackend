@@ -46,7 +46,6 @@ public class ProductController {
             consumes = {MediaType.APPLICATION_JSON_VALUE,
             MediaType.MULTIPART_FORM_DATA_VALUE}
     )
-
     @ResponseStatus(HttpStatus.CREATED)
     public ProductDTO insertProduct(@RequestPart("image") MultipartFile multipartFile,
                                     @RequestPart("product") String productString){

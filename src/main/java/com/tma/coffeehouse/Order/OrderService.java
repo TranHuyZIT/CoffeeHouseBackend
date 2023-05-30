@@ -1,5 +1,6 @@
 package com.tma.coffeehouse.Order;
 
+import com.example.demo.config.Notification;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -17,6 +18,7 @@ import com.tma.coffeehouse.OrderDetails.DTO.OrderDetailDTO;
 import com.tma.coffeehouse.OrderDetails.OrderDetail;
 import com.tma.coffeehouse.OrderDetails.OrderDetailService;
 import com.tma.coffeehouse.Topping.Topping;
+import com.tma.coffeehouse.Utils.MessageQueueUtils;
 import com.tma.coffeehouse.config.Cache.CacheData;
 import com.tma.coffeehouse.config.Cache.CacheRepository;
 import com.tma.coffeehouse.config.Cache.CacheService;
@@ -32,7 +34,6 @@ import org.springframework.stereotype.Service;
 
 
 import java.util.*;
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 @Service
 @RequiredArgsConstructor
 public class OrderService {
@@ -44,6 +45,7 @@ public class OrderService {
     private final CacheService cacheService;
     private final CacheRepository cacheRepository;
     private final ObjectMapper objectMapper;
+    private final MessageQueueUtils messageQueueUtils;
 
     @Transactional(rollbackOn = {CustomException.class, Exception.class, Throwable.class})
     public FullOrderDTO insert(){
@@ -81,6 +83,12 @@ public class OrderService {
         currentOrder.setCustomer(newOrder.getCustomer());
         currentOrder.setDeliveryTime(newOrder.getDeliveryTime());
         currentOrder.setVoucher(newOrder.getVoucher());
+        if (currentOrder.getStatus() != newOrder.getStatus()){
+            messageQueueUtils.pushNotificationQueue(new Notification("Cập nhật đơn hàng #" + currentOrder.getId(),
+                    currentOrder.getCustomer().getUser().getId().toString(),
+                    "Trạng thái đơn hàng của bạn: " +  newOrder.getStatus().toString() + ". Vui lòng giữ điện thoại",
+                    ""));
+        }
         currentOrder.setStatus(newOrder.getStatus() == null ? OrderStatus.RECEIVED : newOrder.getStatus());
         FullOrderDTO fullOrderDTO = fullOrderMapper.modelTODto(currentOrder);
         orderRepository.save(currentOrder);
@@ -115,6 +123,7 @@ public class OrderService {
             orderDetailService.delete(detail.getId());
         }
         orderRepository.delete(order);
+        cacheService.destroyCache("order");
         return fullOrderMapper.modelTODto(order);
     }
     public Page<Order> findAll(Long customerId, Integer pageNo, Integer pageSize, String sortBy, boolean reverse){
@@ -130,11 +139,6 @@ public class OrderService {
                 return objectMapper.readValue(pageOrderAsString, mapType);
             }
             catch (JsonProcessingException ignored){}
-        }
-        try{
-            Thread.sleep(3000);
-        }
-        catch (InterruptedException ignored) {
         }
         if (pageNo == -1){
             Pageable pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(reverse? Sort.Direction.DESC : Sort.Direction.ASC, sortBy));

@@ -54,9 +54,6 @@ public class JWTService {
         return Jwts.parserBuilder().setSigningKey(getSecretKey()).build().parseClaimsJws(token).getBody();
 
     }
-    public void throwExpiredError(String authHeader,String token){
-        throw new ExpiredJwtException(null, this.extractAllClaims(token), "");
-    }
     private Key getSecretKey(){
         byte[] KeyBytes = Decoders.BASE64.decode(SECRET_KEY);
         return Keys.hmacShaKeyFor(KeyBytes);

@@ -6,15 +6,20 @@ import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class MQConfig {
-    public static final String QUEUE_NAME = "message_queue";
-    public static final String EXCHANGE = "message_exchange";
-    public static final String ROUTING_KEY = "message_routing_key";
+    public static final String QUEUE_NAME = "send_mail_queue";
+    public static final String TOPIC_EXCHANGE = "topic_exchange";
+    public static final String ROUTING_KEY = "send_mail_routing_key";
+
+    public static final String NOTIFICATION_QUEUE_NAME = "notification_queue";
+    public static final String DIRECT_EXCHANGE = "direct_exchange";
+    public static final String NOTIFICATION_ROUTING_KEY = "notification_routing_key";
     @Value("${spring.rabbitmq.username}")
     private String username;
     @Value("${spring.rabbitmq.password}")
@@ -24,16 +29,29 @@ public class MQConfig {
     @Value("${spring.rabbitmq.vhost}")
     private String vhost;
     @Bean
-    public Queue queue(){
+    @Qualifier("send_email")
+    public Queue queueEmail(){
         return new Queue(QUEUE_NAME);
     }
     @Bean
-    public TopicExchange exchange(){
-        return new TopicExchange(EXCHANGE);
+    @Qualifier("notification")
+    public Queue queueNotification() {
+        return new Queue(NOTIFICATION_QUEUE_NAME);
     }
     @Bean
-    public Binding binding(Queue queue, TopicExchange exchange){
-        return BindingBuilder.bind(queue).to(exchange).with(ROUTING_KEY);
+    public TopicExchange exchange(){
+        return new TopicExchange(TOPIC_EXCHANGE);
+    }
+    @Bean
+    public DirectExchange directExchange (){
+        return new DirectExchange(DIRECT_EXCHANGE);
+    }
+    @Bean
+    public Binding bindingEmail(DirectExchange exchange){
+        return BindingBuilder.bind(queueEmail()).to(exchange).with(ROUTING_KEY);
+    }
+    @Bean Binding bindingNotification (DirectExchange exchange){
+        return BindingBuilder.bind(queueNotification()).to(exchange).with(NOTIFICATION_ROUTING_KEY);
     }
     @Bean
     public MessageConverter messageConverter(){

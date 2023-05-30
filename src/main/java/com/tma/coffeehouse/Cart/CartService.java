@@ -1,5 +1,6 @@
 package com.tma.coffeehouse.Cart;
 
+import com.example.demo.config.Notification;
 import com.tma.coffeehouse.Cart.DTO.CartDTO;
 import com.tma.coffeehouse.Cart.DTO.CheckOutInfoDTO;
 import com.tma.coffeehouse.Cart.DTO.GetFullCartDTO;
@@ -22,6 +23,7 @@ import com.tma.coffeehouse.OrderDetails.OrderDetailRepository;
 import com.tma.coffeehouse.Product.Product;
 import com.tma.coffeehouse.Topping.Topping;
 import com.tma.coffeehouse.Utils.CustomUtils;
+import com.tma.coffeehouse.Utils.MessageQueueUtils;
 import com.tma.coffeehouse.Voucher.Voucher;
 import com.tma.coffeehouse.Voucher.VoucherRepository;
 import com.tma.coffeehouse.config.Cache.CacheService;
@@ -50,7 +52,7 @@ public class CartService {
     private final DetailOfCartMapper detailOfCartMapper;
     private final CustomerService customerService;
     private final CacheService cacheService;
-    private final CustomUtils customUtils;
+    private final MessageQueueUtils queueUtils;
     public CartDTO insert(Cart cart){
         return cartMapper.modelTODto(
                 cartRepository.save(cart)
@@ -97,9 +99,11 @@ public class CartService {
         }
         String bodyMail = "Chào bạn, cảm ơn đã đặt một đơn hàng tại the Coffee House, chi tiết đơn hàng: \n";
         Order.OrderBuilder newOrder = Order.builder();
-        if (cart.getVoucher() != null){
+        if (checkOutInfoDTO.getVoucherId() != null){
             this.addVoucher(customerId, checkOutInfoDTO.getVoucherId());
-            Voucher voucher = cart.getVoucher();
+            Voucher voucher =  voucherRepository.findById(checkOutInfoDTO.getVoucherId()).orElseThrow(
+                    () -> new CustomException("Không tìm thấy voucher có mã này!", HttpStatus.NOT_FOUND)
+            );
             voucher.setRemainingNumber(voucher.getRemainingNumber() - 1);
             Voucher savedVoucher = voucherRepository.save(voucher);
             newOrder.voucher(savedVoucher);
@@ -132,8 +136,12 @@ public class CartService {
             orderDetailRepository.save(newOrderDetail.build());
             this.deleteCartDetail(cartDetail.getId());
         }
-        customUtils.pushEmailMessageQueue("Đơn hàng của bạn tại The Coffee House",
+        String subject = "Đơn hàng của bạn tại The Coffee House";
+        queueUtils.pushEmailMessageQueue(subject,
                 cart.getCustomer().getUser().getEmail(), bodyMail);
+        queueUtils.pushNotificationQueue(new Notification(subject,
+                savedOrder.getCustomer().getUser().getId().toString(),
+                "Đơn hàng của bạn đang xử lý, giao tại " + savedOrder.getAddress() + ".", ""));
         cacheService.destroyCache("order");
         return savedOrder;
     }
@@ -189,6 +197,7 @@ public class CartService {
         if (voucher!= null && !isVoucherValid(null, voucher.getId())){
             Cart currentcart = cartRepository.findByCustomerId(cart.getCustomer().getId());
             currentcart.setVoucher(null);
+            voucher = null;
             cartRepository.save(currentcart);
         }
         for(CartDetail cartDetail: cartDetails){

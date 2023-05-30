@@ -4,6 +4,7 @@ import com.tma.coffeehouse.ExceptionHandling.CustomException;
 import com.tma.coffeehouse.User.User;
 import com.tma.coffeehouse.User.UserRepository;
 import com.tma.coffeehouse.Utils.CustomUtils;
+import com.tma.coffeehouse.Utils.ImageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,6 +26,7 @@ import java.util.Objects;
 public class CustomerService {
     private final CustomerRepository customerRepository;
     private final UserRepository userRepository;
+    private final ImageService imageService;
     public byte[] getImage(Long id){
         Customer currentCustomer = customerRepository.findById(id)
                 .orElseThrow(() -> new CustomException("Không thể tìm thấy thông tin khách hàng với mã" + id, HttpStatus.NOT_FOUND));
@@ -46,9 +48,7 @@ public class CustomerService {
             return customerRepository.findByUser_NameContaining(name, pageable);
         }
         return customerRepository.findAll(pageable);
-
     }
-
     public Customer insert(String address, Long id, MultipartFile multipartFile){
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new CustomException("Không tìm thấy tài khoản với mã là " + id, HttpStatus.NOT_FOUND));
@@ -58,10 +58,8 @@ public class CustomerService {
                 .image("")
                 .build();
         if (multipartFile != null){
-            String fileName = StringUtils.cleanPath(Objects.requireNonNull(multipartFile.getOriginalFilename()));
-            newCustomer.setImage(fileName);
-            String uploadDir = "./src/main/resources/static/customer-img/" + newCustomer.getId();
-            CustomUtils.uploadFileToDirectory(uploadDir, multipartFile);
+            String imageId = imageService.insertImage("customer", multipartFile);
+            newCustomer.setImage(imageId);
         }
         newCustomer = customerRepository.save(newCustomer);
         return newCustomer;
@@ -71,10 +69,7 @@ public class CustomerService {
                 .orElseThrow(() -> new CustomException("Không thể tìm thấy thông tin khách hàng với mã" + id, HttpStatus.NOT_FOUND));
         String fileName = currentCustomer.getImage();
         if (multipartFile != null){
-            String currentDir = "./src/main/resources/static/customer-img/" + currentCustomer.getId() ;
-            CustomUtils.deleteFile(currentDir + "/" + currentCustomer.getImage());
-             fileName = StringUtils.cleanPath(Objects.requireNonNull(multipartFile.getOriginalFilename()));
-            CustomUtils.uploadFileToDirectory(currentDir, multipartFile);
+            imageService.updateImage(currentCustomer.getImage(), "customer", multipartFile);
         }
         Customer newCustomer =  Customer.builder()
                 .image(fileName)

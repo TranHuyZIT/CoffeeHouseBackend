@@ -2,6 +2,7 @@ package com.tma.coffeehouse.ProductCategory;
 
 import com.tma.coffeehouse.Utils.CustomUtils;
 import com.tma.coffeehouse.ExceptionHandling.CustomException;
+import com.tma.coffeehouse.Utils.ImageService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class ProductCategoryService {
     private final ProductCategoryRepository productCategoryRepository;
+    private final ImageService imageService;
 
     public List<ProductCategory> findAll(){
         return new ArrayList<>(productCategoryRepository.findAll());
@@ -28,27 +30,18 @@ public class ProductCategoryService {
     public ProductCategory insert(String name, MultipartFile multipartFile) {
         ProductCategory cate = new ProductCategory();
 
-        String fileName = StringUtils.cleanPath(Objects.requireNonNull(multipartFile.getOriginalFilename()));
-        cate.setImage(fileName);
         cate.setName(name);
-        ProductCategory saved =  productCategoryRepository.save(cate);
-        String uploadDir = "./src/main/resources/static/prod-category-img/" + saved.getId();
-        CustomUtils.uploadFileToDirectory(uploadDir, multipartFile);
-        return saved;
+        String imageId= imageService.insertImage("product_category", multipartFile);
+        cate.setImage(imageId);
+        return productCategoryRepository.save(cate);
     }
     public ProductCategory update (Long id, String name, MultipartFile multipartfile){
         ProductCategory currentCategory = productCategoryRepository.findById(id)
                 .orElseThrow(() -> new CustomException("Không tìm thấy danh mục sản phẩm với mã " + id, HttpStatus.NOT_FOUND));
         // Delete current image of category
-        CustomUtils.deleteFile("./src/main/resources/static/prod-category-img/" + currentCategory.getId() + "/" + currentCategory.getImage());
         currentCategory.setName(name);
-        String fileName = StringUtils.cleanPath(Objects.requireNonNull(multipartfile.getOriginalFilename()));
-        currentCategory.setImage(fileName);
-        ProductCategory saved = productCategoryRepository.save(currentCategory);
-        // Update new image for this category
-        String uploadDir = "./src/main/resources/static/prod-category-img/" + saved.getId();
-        CustomUtils.uploadFileToDirectory(uploadDir, multipartfile);
-        return saved;
+        imageService.updateImage(currentCategory.getImage(), "product_category", multipartfile);
+        return productCategoryRepository.save(currentCategory);
     }
 
     public ProductCategory delete (Long id){

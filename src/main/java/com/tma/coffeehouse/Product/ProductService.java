@@ -13,22 +13,34 @@ import com.tma.coffeehouse.Topping.ToppingService;
 import com.tma.coffeehouse.Utils.CustomUtils;
 import com.tma.coffeehouse.ExceptionHandling.CustomException;
 import com.tma.coffeehouse.ProductCategory.ProductCategory;
+import com.tma.coffeehouse.Utils.ImageService;
 import com.tma.coffeehouse.config.Cache.CacheData;
 import com.tma.coffeehouse.config.Cache.CacheRepository;
 import com.tma.coffeehouse.config.Cache.CacheService;
 import com.tma.coffeehouse.config.Serializer.PageModule;
+import com.tma.coffeehouse.config.WebClientConfig;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.reactive.function.BodyInserter;
+import org.springframework.web.reactive.function.BodyInserters;
+import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 
 import java.io.File;
 
@@ -45,8 +57,10 @@ public class ProductService {
     private final ProductMapper productMapper;
     private final CacheRepository cacheDataRepository;
     private final CacheService cacheService;
+    private final ImageService imageService;
 
     private final ObjectMapper objectMapper;
+
     @Lazy
     @Autowired
     private ToppingService toppingService;
@@ -65,11 +79,6 @@ public class ProductService {
                 return objectMapper.readValue(pageProductAsString, mapType);
             }
             catch (JsonProcessingException ignored){}
-        }
-        try{
-            Thread.sleep(3000);
-        }
-        catch (InterruptedException ignored) {
         }
         if (pageNo == -1) {
             Pageable pageAndSortingRequest = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(reverse? Sort.Direction.DESC : Sort.Direction. ASC, sortBy));
@@ -114,16 +123,16 @@ public class ProductService {
     public ProductDTO insert(AddProductRequest productRequest, MultipartFile multipartFile) {
         Product newProd = addProductMapper.dtoTOModel(productRequest);
 
-        String fileName = StringUtils.cleanPath(Objects.requireNonNull(multipartFile.getOriginalFilename()));
-        newProd.setImage(fileName);
-
+        // Sending image to Image Service
+        String imageId =  imageService.insertImage("product", multipartFile);
+        newProd.setImage(imageId);
+        cacheService.destroyCache("product");
         Product saved =  productRepository.save(newProd);
+
+        // Binding toppings to new product
         for (Topping topping : newProd.getProductToppings()){
             topping.addProduct(saved);
         }
-        String uploadDir = "./src/main/resources/static/prod-img/" + saved.getId();
-        CustomUtils.uploadFileToDirectory(uploadDir, multipartFile);
-        cacheService.destroyCache("product");
         return productMapper.modelTODto(saved);
     }
     @Transactional(rollbackOn = {CustomException.class, Exception.class, Throwable.class})
@@ -146,12 +155,7 @@ public class ProductService {
             }
             return productMapper.modelTODto(saved);
         }
-
-        CustomUtils.deleteFile("./src/main/resources/static/prod-img/" + currentProd.getId() + "/" + currentProd.getImage());
-        String fileName = StringUtils.cleanPath(Objects.requireNonNull(multipartFile.getOriginalFilename()));
-        currentProd.setImage(fileName);
-        String uploadDir = "./src/main/resources/static/prod-img/" + currentProd.getId();
-        CustomUtils.uploadFileToDirectory(uploadDir, multipartFile);
+        imageService.updateImage(currentProd.getImage(), "product", multipartFile);
         cacheService.destroyCache("product");
         return productMapper.modelTODto(productRepository.save(currentProd));
     }

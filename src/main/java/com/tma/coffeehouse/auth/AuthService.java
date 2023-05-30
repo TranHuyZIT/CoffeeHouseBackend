@@ -7,6 +7,7 @@ import com.tma.coffeehouse.ExceptionHandling.CustomException;
 import com.tma.coffeehouse.User.*;
 import com.tma.coffeehouse.User.DTO.UserResponseDTO;
 import com.tma.coffeehouse.Utils.CustomUtils;
+import com.tma.coffeehouse.Utils.MessageQueueUtils;
 import com.tma.coffeehouse.config.JWTService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +26,7 @@ public class AuthService {
     private final JWTService jwtService;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
-    private final CustomUtils customUtils;
+    private final MessageQueueUtils queueUtils;
     private final CustomerService customerService;
     private final CustomerRepository customerRepository;
 
@@ -54,7 +55,7 @@ public class AuthService {
         CustomUtils.copyFileToDirectory("./src/main/resources/static/customer-img/user.png",
                 "./src/main/resources/static/customer-img/" + newCustomer.getId());
         String token = jwtService.signToken(user);
-        customUtils.pushEmailMessageQueue("Cám Ơn Khách Hàng Đăng Ký Dịch Vụ The Coffee House!",
+        queueUtils.pushEmailMessageQueue("Cám Ơn Khách Hàng Đăng Ký Dịch Vụ The Coffee House!",
                 user.getEmail(),
                 String.format("Cảm ơn %s đã đăng ký dịch vụ của The Coffee House.\n" +
                         "Từ đây bạn có thể đăng ký đặt hàng tại quán với tài khoản %s!. \n",

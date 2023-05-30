@@ -1,8 +1,8 @@
 package com.tma.coffeehouse.Utils;
 
 import com.tma.coffeehouse.ExceptionHandling.CustomException;
+import com.tma.coffeehouse.config.MQConfig.EmailMessage;
 import com.tma.coffeehouse.config.MQConfig.MQConfig;
-import com.tma.coffeehouse.config.MQConfig.QueueMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +22,7 @@ import java.util.Date;
 import java.util.Objects;
 import java.util.UUID;
 
-@Service
-@RequiredArgsConstructor
 public class CustomUtils {
-    private final RabbitTemplate template;
     public static Boolean deleteDirectory (File file){
         File[] contents = file.listFiles();
         if (contents != null) {
@@ -88,9 +85,6 @@ public class CustomUtils {
         }
     }
 
-    public void pushEmailMessageQueue(String subject, String toMail, String body){
-        QueueMessage email = new QueueMessage(UUID.randomUUID().toString(), subject, toMail, body, new Date());
-        template.convertAndSend(MQConfig.EXCHANGE, MQConfig.ROUTING_KEY, email);
-    }
+
 
 }

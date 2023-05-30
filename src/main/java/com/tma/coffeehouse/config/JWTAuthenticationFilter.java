@@ -32,17 +32,18 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,@NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
         System.out.println("JWTAuth Filter called!");
+        String requestUri = request.getRequestURI();
         final String authHeader = request.getHeader("Authorization");
         final String token;
         System.out.println(authHeader);
-        if (authHeader == null || !authHeader.startsWith("Bearer")){
+        if (authHeader == null || !authHeader.startsWith("Bearer") || requestUri.contains("auth")){
             filterChain.doFilter(request, response);
             return;
         }
 
         final String username;
         token = authHeader.substring(7);
-        System.out.println(authHeader);
+        System.out.println(token);
         try{
             username = jwtService.extractUserName(token);
             System.out.println(username);
