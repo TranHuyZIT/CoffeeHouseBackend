@@ -30,8 +30,9 @@ public class AuthController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
     @RequestMapping(method = RequestMethod.POST, path = "/firebase/login")
-    public ResponseEntity<AuthenticateResponse> loginWithSocial(@RequestHeader(HttpHeaders.AUTHORIZATION) String idToken){
+    public ResponseEntity<AuthenticateResponse> loginWithSocial(@RequestHeader(HttpHeaders.AUTHORIZATION) String idToken) throws FirebaseAuthException {
         System.out.println(idToken);
+<<<<<<< HEAD
         try{
             FirebaseToken firebaseToken = firebaseService.decodeToken(idToken.replace("Bearer ", ""));
             Map<String, Object> claims =  firebaseToken.getClaims();
@@ -44,6 +45,10 @@ public class AuthController {
             System.out.println(e);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
+=======
+        return new ResponseEntity<>(firebaseService.signinWithSocial(idToken), HttpStatus.OK);
+
+>>>>>>> 8d7308ca8b8d4f859d5b3f06217a19309b48b0d1
     }
 
     @RequestMapping(method = RequestMethod.POST, path="/login")

@@ -7,6 +7,7 @@ import com.tma.coffeehouse.ExceptionHandling.CustomException;
 import com.tma.coffeehouse.User.*;
 import com.tma.coffeehouse.User.DTO.UserResponseDTO;
 import com.tma.coffeehouse.Utils.CustomUtils;
+import com.tma.coffeehouse.Utils.ImageService;
 import com.tma.coffeehouse.Utils.MessageQueueUtils;
 import com.tma.coffeehouse.config.JWTService;
 import jakarta.transaction.Transactional;
@@ -16,6 +17,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
 
@@ -27,7 +29,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
     private final MessageQueueUtils queueUtils;
-    private final CustomerService customerService;
+    private final ImageService imageService;
     private final CustomerRepository customerRepository;
 
     private final AuthenticationManager authenticationManager;
@@ -36,40 +38,7 @@ public class AuthService {
         String requestUsername = request.getUserName();
         Optional<User> existUser = userRepository.findByUserName(requestUsername);
         if (existUser.isPresent()) throw new CustomException("Username đã tồn tại", HttpStatus.CONFLICT);
-        User user = User.builder()
-                .name("")
-                .userName(request.getUserName())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .email(request.getEmail())
-                .role(Role.USER)
-                .phone((request.getPhone()))
-                .gender(request.getGender())
-                .build();
-        User newUser = userRepository.save(user);
-        Customer customer = Customer.builder()
-                .image("user.png")
-                .address("")
-                .user(newUser)
-                .build();
-        Customer newCustomer = customerRepository.save(customer);
-        CustomUtils.copyFileToDirectory("./src/main/resources/static/customer-img/user.png",
-                "./src/main/resources/static/customer-img/" + newCustomer.getId());
-        String token = jwtService.signToken(user);
-        queueUtils.pushEmailMessageQueue("Cám Ơn Khách Hàng Đăng Ký Dịch Vụ The Coffee House!",
-                user.getEmail(),
-                String.format("Cảm ơn %s đã đăng ký dịch vụ của The Coffee House.\n" +
-                        "Từ đây bạn có thể đăng ký đặt hàng tại quán với tài khoản %s!. \n",
-                        user.getName(), user.getEmail()));
-        return AuthenticateResponse.builder()
-                .token(token)
-                .id(newUser.getId())
-                .email(newUser.getEmail())
-                .gender(newUser.getGender())
-                .phone(newUser.getPhone())
-                .name(newUser.getName())
-                .role(newUser.getRole())
-                .userName(newUser.getUsername())
-                .build();
+        return this.createCustomer(request);
     }
 
     public AuthenticateResponse authenticate(AuthenticateRequest request){
@@ -102,5 +71,78 @@ public class AuthService {
         UserResponseDTO userResponseDTO = userMapper.modelTODTO(user);
         userResponseDTO.setToken(token);
         return userResponseDTO;
+    }
+    public AuthenticateResponse createCustomer(RegisterRequest request){
+        User user = User.builder()
+                .name("")
+                .userName(request.getUserName())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .email(request.getEmail())
+                .role(Role.USER)
+                .phone((request.getPhone()))
+                .gender(request.getGender())
+                .build();
+        User newUser = userRepository.save(user);
+        Customer customer = Customer.builder()
+                .image("6476301a730277022059f8b5")
+                .address("")
+                .user(newUser)
+                .build();
+        customerRepository.save(customer);
+        String token = jwtService.signToken(user);
+        if (user.getEmail() != null){
+            queueUtils.pushEmailMessageQueue("Cám Ơn Khách Hàng Đăng Ký Dịch Vụ The Coffee House!",
+                    user.getEmail(),
+                    String.format("Cảm ơn %s đã đăng ký dịch vụ của The Coffee House.\n" +
+                                    "Từ đây bạn có thể đăng ký đặt hàng tại quán với tài khoản %s!. \n",
+                            user.getName(), user.getEmail()));
+        }
+        return AuthenticateResponse.builder()
+                .token(token)
+                .id(newUser.getId())
+                .email(newUser.getEmail())
+                .gender(newUser.getGender())
+                .phone(newUser.getPhone())
+                .name(newUser.getName())
+                .role(newUser.getRole())
+                .userName(newUser.getUsername())
+                .build();
+    }
+    public AuthenticateResponse createCustomer(RegisterRequest request, String pictureURL){
+        User user = User.builder()
+                .name("")
+                .userName(request.getUserName())
+                .password(passwordEncoder.encode(request.getPassword()))
+                .email(request.getEmail())
+                .role(Role.USER)
+                .phone((request.getPhone()))
+                .gender(request.getGender())
+                .build();
+        User newUser = userRepository.save(user);
+        String image = imageService.insertImage("customer", pictureURL, request.getUserName());
+        Customer customer = Customer.builder()
+                .image(image)
+                .address("")
+                .user(newUser)
+                .build();
+        customerRepository.save(customer);
+        String token = jwtService.signToken(user);
+        if (user.getEmail() != null){
+            queueUtils.pushEmailMessageQueue("Cám Ơn Khách Hàng Đăng Ký Dịch Vụ The Coffee House!",
+                    user.getEmail(),
+                    String.format("Cảm ơn %s đã đăng ký dịch vụ của The Coffee House.\n" +
+                                    "Từ đây bạn có thể đăng ký đặt hàng tại quán với tài khoản %s!. \n",
+                            user.getName(), user.getEmail()));
+        }
+        return AuthenticateResponse.builder()
+                .token(token)
+                .id(newUser.getId())
+                .email(newUser.getEmail())
+                .gender(newUser.getGender())
+                .phone(newUser.getPhone())
+                .name(newUser.getName())
+                .role(newUser.getRole())
+                .userName(newUser.getUsername())
+                .build();
     }
 }

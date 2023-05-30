@@ -1,5 +1,6 @@
 package com.tma.coffeehouse.ExceptionHandling;
 
+import com.google.firebase.auth.FirebaseAuthException;
 import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -22,6 +23,12 @@ public class ApplicationExceptionHandler {
         Map<String, String> errorMap = new HashMap<>();
         errorMap.put("message", "Thông tin đăng nhập không hợp lệ, vui lòng kiểm tra lại tài khoản và mật khẩu");
         return errorMap;
+    }
+    @ExceptionHandler
+    public ResponseEntity<Map<String, String>> handleFirebaseAuthException(FirebaseAuthException e){
+        Map<String, String> errorMap = new HashMap<>();
+        errorMap.put("message", e.getMessage());
+        return new ResponseEntity<>(errorMap, HttpStatus.valueOf(e.getAuthErrorCode().ordinal()));
     }
 
     @ExceptionHandler

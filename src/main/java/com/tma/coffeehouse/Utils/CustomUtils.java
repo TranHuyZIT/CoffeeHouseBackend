@@ -8,10 +8,12 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StreamUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.*;
@@ -83,6 +85,12 @@ public class CustomUtils {
         }catch(IOException e){
             throw new CustomException("Có lỗi xảy ra khi upload file", HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    static public MultipartFile getFileFromPath (String filePath){
+        File file = new File(filePath);
+        return new JavaFileToMultipartFile(file);
+
     }
 
 
