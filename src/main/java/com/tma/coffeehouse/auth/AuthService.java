@@ -119,7 +119,7 @@ public class AuthService {
                 .gender(request.getGender())
                 .build();
         User newUser = userRepository.save(user);
-        String image = imageService.insertImage("customer", pictureURL);
+        String image = imageService.insertImage("customer", pictureURL, request.getUserName());
         Customer customer = Customer.builder()
                 .image(image)
                 .address("")

@@ -27,10 +27,11 @@ public class ImageService {
                 .bodyToMono(String.class)
                 .block();
     }
-    public String insertImage(String type, String imageUrl){
+    public String insertImage(String type, String imageUrl, String name){
         MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
         bodyBuilder.part("type", type);
         bodyBuilder.part("imageUrl", imageUrl);
+        bodyBuilder.part("name", name);
         return webClient.post().uri(ImageServiceURL + "add-url")
                 .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
                 .retrieve()

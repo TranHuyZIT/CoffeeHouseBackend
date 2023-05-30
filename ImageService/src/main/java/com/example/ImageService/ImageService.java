@@ -26,8 +26,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -65,6 +68,25 @@ public class ImageService {
         catch (Exception e){
             throw new CustomException("Lỗi ảnh", HttpStatus.BAD_REQUEST);
         }
+        return this.saveImage(type, gridFSId);
+    }
+    public String addImage(String imageUrl, String type, String name){
+        String gridFsId;
+        try{
+            InputStream inputStream = new URL(imageUrl).openStream();
+            DBObject metadata = new BasicDBObject();
+            metadata.put("type", type);
+            gridFsId = gridFsTemplate.store(
+                    inputStream, name, metadata
+            ).toString();
+        }
+        catch (Exception e){
+            throw new CustomException(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+        return this.saveImage(type, gridFsId);
+    }
+
+    public String saveImage(String type, String gridFSId){
         switch (type) {
             case "product" -> {
                 ProductImage productImage = ProductImage.builder()
@@ -92,6 +114,7 @@ public class ImageService {
             }
         }
     }
+
     public byte[] getImage(String type ,String id) {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         switch (type) {

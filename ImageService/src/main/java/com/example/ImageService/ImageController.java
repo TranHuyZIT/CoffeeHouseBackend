@@ -28,6 +28,12 @@ public class ImageController {
                            @RequestPart(value = "type") String type) throws Exception {
         return imageService.addImage(image, type);
     }
+    @PostMapping(value = "/image-url")
+    public String addImageFromUrl(@RequestPart(value = "type") String type,
+                                  @RequestPart(value = "name") String name,
+                                  @RequestPart(value = "imageUrl") String imageURl){
+        return imageService.addImage(imageURl, type, name);
+    }
     @PutMapping(value = "{type}/{id}",
             consumes = {MediaType.MULTIPART_FORM_DATA_VALUE, MediaType.APPLICATION_JSON_VALUE,}
     )
