@@ -1,6 +1,5 @@
 package com.tma.coffeehouse.VoucherCode;
 
-import com.example.demo.config.Notification;
 import com.tma.coffeehouse.ExceptionHandling.CustomException;
 import com.tma.coffeehouse.Product.Product;
 import com.tma.coffeehouse.User.User;
@@ -9,6 +8,7 @@ import com.tma.coffeehouse.Utils.MessageQueueUtils;
 import com.tma.coffeehouse.Voucher.Voucher;
 import com.tma.coffeehouse.Voucher.VoucherRepository;
 import com.tma.coffeehouse.Voucher.VoucherService;
+import com.tma.coffeehouse.config.MQConfig.Notification;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

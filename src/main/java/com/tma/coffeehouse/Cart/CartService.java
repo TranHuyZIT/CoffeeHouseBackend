@@ -1,6 +1,5 @@
 package com.tma.coffeehouse.Cart;
 
-import com.example.demo.config.Notification;
 import com.tma.coffeehouse.Cart.DTO.CartDTO;
 import com.tma.coffeehouse.Cart.DTO.CheckOutInfoDTO;
 import com.tma.coffeehouse.Cart.DTO.GetFullCartDTO;
@@ -27,6 +26,7 @@ import com.tma.coffeehouse.Utils.MessageQueueUtils;
 import com.tma.coffeehouse.Voucher.Voucher;
 import com.tma.coffeehouse.Voucher.VoucherRepository;
 import com.tma.coffeehouse.config.Cache.CacheService;
+import com.tma.coffeehouse.config.MQConfig.Notification;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

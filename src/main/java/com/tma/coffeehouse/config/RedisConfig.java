@@ -30,7 +30,7 @@ public class RedisConfig {
     @Bean
     @Primary
     public RedisTemplate<String, Object> redisTemplate(RedisConnectionFactory redisConnectionFactory) {
-        // tạo ra một RedisTemplate
+        // Tạo ra một RedisTemplate
         // Với Key là Object
         // Value là Object
         // RedisTemplate giúp chúng ta thao tác với Redis

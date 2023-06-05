@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class TestMessageQueue {
     private final MessageQueueUtils messageQueueUtils;
     @PostMapping("/notification")
-    public void testNotificationQueue(@RequestBody com.example.demo.config.Notification notification){
+    public void testNotificationQueue(@RequestBody Notification notification){
         messageQueueUtils.pushNotificationQueue(notification);
     }
     @PostMapping("/email")

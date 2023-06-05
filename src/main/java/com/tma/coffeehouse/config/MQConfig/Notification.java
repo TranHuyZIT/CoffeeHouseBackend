@@ -1,4 +1,4 @@
-package com.example.demo.config;
+package com.tma.coffeehouse.config.MQConfig;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

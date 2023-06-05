@@ -1,8 +1,8 @@
 package com.tma.coffeehouse.Utils;
 
-import com.example.demo.config.Notification;
 import com.tma.coffeehouse.config.MQConfig.EmailMessage;
 import com.tma.coffeehouse.config.MQConfig.MQConfig;
+import com.tma.coffeehouse.config.MQConfig.Notification;
 import org.aspectj.weaver.ast.Not;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;

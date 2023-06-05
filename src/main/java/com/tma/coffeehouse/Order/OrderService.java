@@ -1,6 +1,5 @@
 package com.tma.coffeehouse.Order;
 
-import com.example.demo.config.Notification;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,6 +21,7 @@ import com.tma.coffeehouse.Utils.MessageQueueUtils;
 import com.tma.coffeehouse.config.Cache.CacheData;
 import com.tma.coffeehouse.config.Cache.CacheRepository;
 import com.tma.coffeehouse.config.Cache.CacheService;
+import com.tma.coffeehouse.config.MQConfig.Notification;
 import com.tma.coffeehouse.config.Serializer.PageModule;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

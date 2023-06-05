@@ -34,3 +34,5 @@ build/
 
 ## Firebase ##
 FirebaseCredential.json
+
+application.properties
