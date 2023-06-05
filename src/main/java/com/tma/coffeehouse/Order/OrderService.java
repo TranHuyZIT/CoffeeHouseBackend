@@ -3,18 +3,15 @@ package com.tma.coffeehouse.Order;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tma.coffeehouse.Cart.DTO.CartDTO;
-import com.tma.coffeehouse.CartDetails.CartDetail;
 import com.tma.coffeehouse.ExceptionHandling.CustomException;
 import com.tma.coffeehouse.Order.DTO.AddOrderDTO;
 import com.tma.coffeehouse.Order.DTO.FullOrderDTO;
-import com.tma.coffeehouse.Order.DTO.OrderDTO;
+import com.tma.coffeehouse.Order.DTO.ReportRequest;
 import com.tma.coffeehouse.Order.Mapper.AddOrderMapper;
 import com.tma.coffeehouse.Order.Mapper.FullOrderMapper;
 import com.tma.coffeehouse.Order.Mapper.OrderMapper;
 import com.tma.coffeehouse.OrderDetails.DTO.AddOrderDetailDTO;
 import com.tma.coffeehouse.OrderDetails.DTO.OrderDetailDTO;
-import com.tma.coffeehouse.OrderDetails.OrderDetail;
 import com.tma.coffeehouse.OrderDetails.OrderDetailService;
 import com.tma.coffeehouse.Topping.Topping;
 import com.tma.coffeehouse.Utils.MessageQueueUtils;
@@ -25,18 +22,34 @@ import com.tma.coffeehouse.config.MQConfig.Notification;
 import com.tma.coffeehouse.config.Serializer.PageModule;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import net.sf.jasperreports.engine.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.util.ResourceUtils;
 
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.*;
 @Service
 @RequiredArgsConstructor
 public class OrderService {
+    @Value("${report.path}")
+    private String reportFolder;
+    @Value("${spring.datasource.url}")
+    private String SQLConnectionString;
+    @Value("${spring.datasource.username}")
+    private String SQLUsername;
+    @Value("${spring.datasource.password}")
+    private String SQLPassword;
     private final OrderDetailService orderDetailService;
     private final OrderRepository orderRepository;
     private final AddOrderMapper addOrderMapper;
@@ -46,6 +59,7 @@ public class OrderService {
     private final CacheRepository cacheRepository;
     private final ObjectMapper objectMapper;
     private final MessageQueueUtils messageQueueUtils;
+
 
     @Transactional(rollbackOn = {CustomException.class, Exception.class, Throwable.class})
     public FullOrderDTO insert(){
@@ -155,5 +169,20 @@ public class OrderService {
         Page<Order> results = orderRepository.findAll(pageable);
         cacheService.writeCache(key, results);
         return results;
+    }
+
+    public String exportReport(ReportRequest reportRequest) throws FileNotFoundException, JRException, SQLException {
+        File jasperFile = ResourceUtils.getFile("./src/main/resources/static/orderReport.jrxml");
+        JasperReport jasperReport = JasperCompileManager.compileReport(jasperFile.getAbsolutePath());
+        Connection connection = DriverManager.getConnection(SQLConnectionString, SQLUsername, SQLPassword);
+        JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, new HashMap<>(), connection);
+        String fileName = UUID.randomUUID().toString();
+        switch (reportRequest.getFormat()) {
+            case "pdf" -> JasperExportManager.exportReportToPdfFile(jasperPrint, reportFolder +
+                    "/" + fileName + ".pdf");
+            case "html" -> JasperExportManager.exportReportToHtmlFile(jasperPrint, reportFolder +
+                    "/" + fileName + ".html");
+        }
+        return reportFolder + "/" + fileName + "." + reportRequest.getFormat();
     }
 }

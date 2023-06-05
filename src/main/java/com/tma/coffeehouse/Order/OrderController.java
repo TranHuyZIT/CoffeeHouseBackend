@@ -3,10 +3,15 @@ package com.tma.coffeehouse.Order;
 import com.tma.coffeehouse.Order.DTO.AddOrderDTO;
 import com.tma.coffeehouse.Order.DTO.FullOrderDTO;
 import com.tma.coffeehouse.Order.DTO.OrderDTO;
+import com.tma.coffeehouse.Order.DTO.ReportRequest;
 import lombok.RequiredArgsConstructor;
+import net.sf.jasperreports.engine.JRException;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.FileNotFoundException;
+import java.sql.SQLException;
 
 @RestController
 @RequestMapping("/api/v1/")
@@ -39,5 +44,10 @@ public class OrderController {
             @RequestParam(defaultValue = "true", name="reverse", required = false) boolean reverse
     ){
         return orderService.findAll(customerId , pageNo - 1, pageSize, sortBy, reverse);
+    }
+    @GetMapping("admin/order/report")
+    @ResponseStatus(HttpStatus.OK)
+    public String exportReport(@RequestBody ReportRequest reportRequest) throws JRException, FileNotFoundException, SQLException {
+        return orderService.exportReport(reportRequest);
     }
 }
