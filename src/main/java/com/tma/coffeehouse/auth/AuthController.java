@@ -31,6 +31,7 @@ public class AuthController {
     }
     @RequestMapping(method = RequestMethod.POST, path = "/firebase/login")
     public ResponseEntity<AuthenticateResponse> loginWithSocial(@RequestHeader(HttpHeaders.AUTHORIZATION) String idToken) throws FirebaseAuthException {
+        System.out.println(idToken);
         return new ResponseEntity<>(firebaseService.signinWithSocial(idToken), HttpStatus.OK);
     }
 
