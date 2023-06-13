@@ -8,9 +8,11 @@ import lombok.RequiredArgsConstructor;
 import net.sf.jasperreports.engine.JRException;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.sql.SQLException;
 
 @RestController
@@ -45,9 +47,9 @@ public class OrderController {
     ){
         return orderService.findAll(customerId , pageNo - 1, pageSize, sortBy, reverse);
     }
-    @GetMapping("admin/order/report")
+    @PostMapping(value = "admin/order/report", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_PDF_VALUE)
     @ResponseStatus(HttpStatus.OK)
-    public String exportReport(@RequestBody ReportRequest reportRequest) throws JRException, FileNotFoundException, SQLException {
+    public byte[] exportReport(@RequestBody ReportRequest reportRequest) throws JRException, IOException, SQLException {
         return orderService.exportReport(reportRequest);
     }
 }

@@ -10,4 +10,5 @@ import java.util.List;
 @Repository
 public interface CacheRepository extends CrudRepository<CacheData, String> {
     List<CacheData> findByKeyContainingIgnoreCase(String key);
+
 }

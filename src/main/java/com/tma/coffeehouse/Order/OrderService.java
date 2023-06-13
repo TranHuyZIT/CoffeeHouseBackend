@@ -14,6 +14,7 @@ import com.tma.coffeehouse.OrderDetails.DTO.AddOrderDetailDTO;
 import com.tma.coffeehouse.OrderDetails.DTO.OrderDetailDTO;
 import com.tma.coffeehouse.OrderDetails.OrderDetailService;
 import com.tma.coffeehouse.Topping.Topping;
+import com.tma.coffeehouse.Utils.CustomUtils;
 import com.tma.coffeehouse.Utils.MessageQueueUtils;
 import com.tma.coffeehouse.config.Cache.CacheData;
 import com.tma.coffeehouse.config.Cache.CacheRepository;
@@ -35,6 +36,8 @@ import org.springframework.util.ResourceUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -42,8 +45,6 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 public class OrderService {
-    @Value("${report.path}")
-    private String reportFolder;
     @Value("${spring.datasource.url}")
     private String SQLConnectionString;
     @Value("${spring.datasource.username}")
@@ -171,18 +172,20 @@ public class OrderService {
         return results;
     }
 
-    public String exportReport(ReportRequest reportRequest) throws FileNotFoundException, JRException, SQLException {
+    public byte[] exportReport(ReportRequest reportRequest) throws IOException, JRException, SQLException {
         File jasperFile = ResourceUtils.getFile("./src/main/resources/static/orderReport.jrxml");
         JasperReport jasperReport = JasperCompileManager.compileReport(jasperFile.getAbsolutePath());
         Connection connection = DriverManager.getConnection(SQLConnectionString, SQLUsername, SQLPassword);
         JasperPrint jasperPrint = JasperFillManager.fillReport(jasperReport, new HashMap<>(), connection);
         String fileName = UUID.randomUUID().toString();
         switch (reportRequest.getFormat()) {
-            case "pdf" -> JasperExportManager.exportReportToPdfFile(jasperPrint, reportFolder +
-                    "/" + fileName + ".pdf");
-            case "html" -> JasperExportManager.exportReportToHtmlFile(jasperPrint, reportFolder +
-                    "/" + fileName + ".html");
+            case "pdf" -> {
+                return JasperExportManager.exportReportToPdf(jasperPrint);
+            }
+            case "html" -> {
+                return null;
+            }
         }
-        return reportFolder + "/" + fileName + "." + reportRequest.getFormat();
+        return null;
     }
 }

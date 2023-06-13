@@ -33,7 +33,6 @@ public class MongoConfig extends AbstractMongoClientConfiguration{
     public MongoClient mongoClient() {
         String mongoUriString = String.format("mongodb://%s:%s@%s:%s/%s?authSource=%s",
                 username, password, host, port, database, authenticationDB);
-        System.out.println(mongoUriString);
         ConnectionString connectionString =
                 new ConnectionString(mongoUriString);
         MongoClientSettings mongoClientSettings = MongoClientSettings.builder()

@@ -9,12 +9,15 @@ import com.tma.coffeehouse.User.DTO.UserResponseDTO;
 import com.tma.coffeehouse.Utils.CustomUtils;
 import com.tma.coffeehouse.Utils.ImageService;
 import com.tma.coffeehouse.Utils.MessageQueueUtils;
+import com.tma.coffeehouse.config.Cache.Refreshtoken.RefreshTokenService;
 import com.tma.coffeehouse.config.JWTService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -31,6 +34,8 @@ public class AuthService {
     private final MessageQueueUtils queueUtils;
     private final ImageService imageService;
     private final CustomerRepository customerRepository;
+    private final UserDetailsService userDetailsService;
+    private final RefreshTokenService refreshTokenService;
 
     private final AuthenticationManager authenticationManager;
     @Transactional(rollbackOn = {Throwable.class, Exception.class})
@@ -40,6 +45,7 @@ public class AuthService {
         if (existUser.isPresent()) throw new CustomException("Username đã tồn tại", HttpStatus.CONFLICT);
         return this.createCustomer(request);
     }
+
 
     public AuthenticateResponse authenticate(AuthenticateRequest request){
         authenticationManager.authenticate(
@@ -51,8 +57,11 @@ public class AuthService {
         User user = userRepository.findByUserName(request.getUserName())
                 .orElseThrow(()->new CustomException("Tài khoản " + request.getUserName()+ " không tồn tại", HttpStatus.NOT_FOUND));
         String token = jwtService.signToken(user);
+        String refreshToken = jwtService.signRefreshToken(user);
+        refreshTokenService.storeRefreshToken(refreshToken);
         return AuthenticateResponse.builder()
                 .token(token)
+                .refreshToken(refreshToken)
                 .id(user.getId())
                 .email(user.getEmail())
                 .gender(user.getGender())
@@ -61,6 +70,20 @@ public class AuthService {
                 .role(user.getRole())
                 .userName(user.getUsername())
                 .build();
+    }
+    public String requestRefreshToken(String bearerToken){
+        String refreshToken = bearerToken.substring(7);
+        System.out.println(refreshToken);
+        // Check the refresh token is valid
+        if (jwtService.isRefreshTokenValid(refreshToken)){
+            // If valid then generate new access token
+            String userName = jwtService.extractUserNameRefreshToken(refreshToken);
+            UserDetails userDetails = userDetailsService.loadUserByUsername(userName);
+            return jwtService.signToken(userDetails);
+        }
+        else{
+            throw new CustomException("Invalid refresh token" , HttpStatus.UNAUTHORIZED);
+        }
     }
 
     public UserResponseDTO getIdentity(String token){
@@ -90,6 +113,8 @@ public class AuthService {
                 .build();
         customerRepository.save(customer);
         String token = jwtService.signToken(user);
+        String refreshToken = jwtService.signRefreshToken(user);
+        refreshTokenService.storeRefreshToken(refreshToken);
         if (user.getEmail() != null){
             queueUtils.pushEmailMessageQueue("Cám Ơn Khách Hàng Đăng Ký Dịch Vụ The Coffee House!",
                     user.getEmail(),
@@ -99,6 +124,7 @@ public class AuthService {
         }
         return AuthenticateResponse.builder()
                 .token(token)
+                .refreshToken(refreshToken)
                 .id(newUser.getId())
                 .email(newUser.getEmail())
                 .gender(newUser.getGender())
@@ -127,6 +153,8 @@ public class AuthService {
                 .build();
         customerRepository.save(customer);
         String token = jwtService.signToken(user);
+        String refreshToken = jwtService.signRefreshToken(user);
+        refreshTokenService.storeRefreshToken(refreshToken);
         if (user.getEmail() != null){
             queueUtils.pushEmailMessageQueue("Cám Ơn Khách Hàng Đăng Ký Dịch Vụ The Coffee House!",
                     user.getEmail(),
@@ -136,6 +164,7 @@ public class AuthService {
         }
         return AuthenticateResponse.builder()
                 .token(token)
+                .refreshToken(refreshToken)
                 .id(newUser.getId())
                 .email(newUser.getEmail())
                 .gender(newUser.getGender())

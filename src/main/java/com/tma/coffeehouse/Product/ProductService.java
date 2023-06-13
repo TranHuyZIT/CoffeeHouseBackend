@@ -91,6 +91,9 @@ public class ProductService {
         cacheService.writeCache(key, results);
         return results;
     }
+    List<Product> getAllProductsByImages(String[] images){
+        return productRepository.findAllByImages(images);
+    }
     byte[] getImage(Long id){
         Product currentProd = productRepository.findById(id)
                 .orElseThrow(() -> new CustomException("Không tìm thấy sản phẩm với mã " + id, HttpStatus.NOT_FOUND));

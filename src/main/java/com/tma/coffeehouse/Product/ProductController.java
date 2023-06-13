@@ -3,6 +3,7 @@ package com.tma.coffeehouse.Product;
 
 import com.tma.coffeehouse.Product.DTO.AddProductRequest;
 import com.tma.coffeehouse.Product.DTO.ProductDTO;
+import com.tma.coffeehouse.config.JsonArg;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -10,7 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
+import java.util.List;
 import static org.springframework.http.MediaType.IMAGE_PNG_VALUE;
 
 @RestController
@@ -30,6 +31,14 @@ public class ProductController {
     )
     {
         return productService.findAll(prodCategoryID, name, pageNo - 1, pageSize, sortBy, reverse);
+    }
+    @GetMapping("/product/images")
+    @ResponseStatus(HttpStatus.OK)
+    public List<Product> getAllProductsByImages(@JsonArg("images") String [] images){
+        System.out.println(images[0]);
+        List<Product> list =  productService.getAllProductsByImages(images);
+        System.out.println(list);
+        return list;
     }
     @GetMapping(value = "/product/image/{id}", produces = IMAGE_PNG_VALUE)
     @ResponseStatus(HttpStatus.OK)

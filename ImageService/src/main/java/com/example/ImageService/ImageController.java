@@ -1,12 +1,24 @@
 package com.example.ImageService;
 
+import com.example.ImageService.Entities.ProductImage;
+import com.example.ImageService.Repositories.ProductImageRepository;
+import com.mongodb.client.gridfs.model.GridFSFile;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.gridfs.GridFsTemplate;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
+import java.io.IOException;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import static org.springframework.http.MediaType.IMAGE_PNG_VALUE;
 
@@ -18,6 +30,14 @@ public class ImageController {
     @GetMapping(value = "/{type}/{id}" , produces = IMAGE_PNG_VALUE)
     public byte[] getImage(@PathVariable("type") String type , @PathVariable("id") String id){
         return imageService.getImage(type, id);
+    }
+    @GetMapping(value = "/product/image-zip")
+    public ResponseEntity<byte[]> zipDownload() throws IOException {
+        byte[] zipBytes = imageService.zipDownload();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+        headers.setContentDispositionFormData("attachment", "image.zip");
+        return new ResponseEntity<>(zipBytes, headers, HttpStatus.OK);
     }
     @PostMapping(
         value = "/",

@@ -1,5 +1,7 @@
 package com.tma.coffeehouse.config;
 
+import com.tma.coffeehouse.config.Cache.Refreshtoken.RefreshToken;
+import com.tma.coffeehouse.config.Serializer.RefreshTokenSerializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.context.annotation.Bean;
@@ -40,6 +42,23 @@ public class RedisConfig {
         template.setKeySerializer(new StringRedisSerializer());
         template.setHashKeySerializer(new JdkSerializationRedisSerializer());
         template.setValueSerializer(new JdkSerializationRedisSerializer());
+        template.setEnableTransactionSupport(true);
+        template.afterPropertiesSet();
+        return template;
+    }
+    @Bean
+    @Primary
+    public RedisTemplate<String, RefreshToken> redisTemplateRefreshToken(RedisConnectionFactory redisConnectionFactory) {
+        // Tạo ra một RedisTemplate
+        // Với Key là Object
+        // Value là Object
+        // RedisTemplate giúp chúng ta thao tác với Redis
+        RedisTemplate<String, RefreshToken> template = new RedisTemplate<>();
+        template.setConnectionFactory(redisConnectionFactory);
+        template.setHashKeySerializer(new StringRedisSerializer());
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setHashKeySerializer(new JdkSerializationRedisSerializer());
+        template.setValueSerializer(new RefreshTokenSerializer());
         template.setEnableTransactionSupport(true);
         template.afterPropertiesSet();
         return template;

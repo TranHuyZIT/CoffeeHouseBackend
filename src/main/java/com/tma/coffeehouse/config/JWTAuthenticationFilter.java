@@ -3,6 +3,7 @@ package com.tma.coffeehouse.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tma.coffeehouse.ExceptionHandling.CustomException;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,7 +36,6 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
         String requestUri = request.getRequestURI();
         final String authHeader = request.getHeader("Authorization");
         final String token;
-        System.out.println(authHeader);
         if (authHeader == null || !authHeader.startsWith("Bearer") || requestUri.contains("auth")){
             filterChain.doFilter(request, response);
             return;
@@ -46,14 +46,25 @@ public class JWTAuthenticationFilter extends OncePerRequestFilter {
         System.out.println(token);
         try{
             username = jwtService.extractUserName(token);
-            System.out.println(username);
         }
         catch (ExpiredJwtException e){
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            // Write the response body
-            // Create a Map to represent the response body
             Map<String, String> responseBody = new HashMap<>();
             responseBody.put("message", "You are not authenticated");
+            response.setContentType("application/json");
+
+            // Write the response body
+            ObjectMapper mapper = new ObjectMapper();
+            PrintWriter out = response.getWriter();
+            mapper.writeValue(out, responseBody);
+            out.flush();
+            out.close();
+            return;
+        }
+        catch (SignatureException e){
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            Map<String, String> responseBody = new HashMap<>();
+            responseBody.put("message", "Invalid Token");
             response.setContentType("application/json");
 
             // Write the response body

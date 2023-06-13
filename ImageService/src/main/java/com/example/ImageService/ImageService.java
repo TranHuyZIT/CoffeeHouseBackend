@@ -14,6 +14,7 @@ import com.mongodb.client.gridfs.GridFSBucket;
 import com.mongodb.client.gridfs.GridFSBuckets;
 import com.mongodb.client.gridfs.model.GridFSFile;
 import lombok.RequiredArgsConstructor;
+import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.MongoDatabaseFactory;
 import org.springframework.data.mongodb.config.MongoDbFactoryParser;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -29,8 +30,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 @Service
 @RequiredArgsConstructor
@@ -45,6 +49,28 @@ public class ImageService {
         MongoDatabase db = mongoDatabaseFactory.getMongoDatabase();
         return GridFSBuckets.create(db);
     }
+
+    public byte[] zipDownload() throws IOException {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        List<ProductImage> productImageList = productImageRepository.findAll();
+        ZipOutputStream zipOutputStream = new ZipOutputStream(byteArrayOutputStream);
+        for (ProductImage productImage: productImageList){
+            String gridFSId = productImage.getImage();
+            InputStream image = getGridFs().openDownloadStream(new ObjectId(gridFSId));
+            ZipEntry zipEntry = new ZipEntry(productImage.getId() + ".jpg");
+            zipOutputStream.putNextEntry(zipEntry);
+
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = image.read(buffer)) > 0) {
+                zipOutputStream.write(buffer, 0, length);
+            }
+            image.close();
+        }
+        zipOutputStream.close();
+        return byteArrayOutputStream.toByteArray();
+    }
+
     public byte[] findOneAndConvertToBytes (String fileId){
         GridFSFile file = gridFsTemplate.findOne(Query.query(Criteria.where("_id").is(fileId)));
         GridFsResource resource =  new GridFsResource(file, getGridFs().openDownloadStream(file.getObjectId()));

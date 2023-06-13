@@ -29,6 +29,15 @@ public class AuthController {
         AuthenticateResponse response = authService.register(request);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
+    @RequestMapping(method = RequestMethod.POST, path = "/refresh-token")
+    public ResponseEntity<AuthenticateResponse> refreshToken(@RequestHeader(HttpHeaders.AUTHORIZATION) String bearerToken){
+        String accessToken = authService.requestRefreshToken(bearerToken);
+        return new ResponseEntity<>(
+                AuthenticateResponse.builder()
+                        .token(accessToken)
+                        .build(), HttpStatus.CREATED
+        );
+    }
     @RequestMapping(method = RequestMethod.POST, path = "/firebase/login")
     public ResponseEntity<AuthenticateResponse> loginWithSocial(@RequestHeader(HttpHeaders.AUTHORIZATION) String idToken) throws FirebaseAuthException {
         System.out.println(idToken);
