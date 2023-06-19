@@ -4,31 +4,34 @@ server:
 spring:
   application:
     name: api-gateway
-  gateway:
-    routes:
-      - id: auth-service
-        uri: http://auth-service
-        predicates:
-          - Path=/api/v1/auth/**
+  cloud:
+    gateway:
+      routes:
+        - id: auth-service
+          uri: lb://auth-service
+          predicates:
+            - Path=/api/v1/auth/**
 
-      - id: image-service
-        uri: http://image-service
-        predicates:
-          - Path=/api/v1/image/**
+        - id: image-service
+          uri: lb://image-service
+          predicates:
+            - Path=/api/v1/image/**
 
-      - id: main-service
-        uri: http://main-service
-        predicates:
-          - Path=/api/v1/main/**
+        - id: main-service
+          uri: lb://main-service
+          predicates:
+            - Path=/api/v1/main/**
 
-      - id: notification-service
-        uri: http://notification-service
-        predicates:
-          - Path=/api/v1/queue/**
+        - id: notification-service
+          uri: lb://notification-service
+          predicates:
+            - Path=/api/v1/queue/**
+
 eureka:
   client:
     serviceUrl:
       defaultZone: http://localhost:8761/eureka
+
 logging:
   level:
     root: INFO

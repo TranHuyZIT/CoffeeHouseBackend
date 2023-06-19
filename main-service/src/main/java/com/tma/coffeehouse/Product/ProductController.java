@@ -15,7 +15,7 @@ import java.util.List;
 import static org.springframework.http.MediaType.IMAGE_PNG_VALUE;
 
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/main")
 @RequiredArgsConstructor
 public class ProductController {
     private final ProductService productService;
